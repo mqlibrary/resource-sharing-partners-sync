@@ -2,73 +2,85 @@ package org.nishen.resourcepartners;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumSet;
 
-import javax.inject.Inject;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import javax.servlet.ServletRegistration;
+import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
-import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.servlet.GuiceFilter;
 
 public class SyncLauncher
 {
 	private static final Logger log = LoggerFactory.getLogger(SyncLauncher.class);
 
-	// Base URI the Grizzly HTTP server will listen on
-	public static final String BASE_URI = "http://localhost:8080/myapp/";
+	private static final String SERVICE_NAME = "Resource Sharing Partners Sync Service";
 
-	private ServiceLocator locator;
+	private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:2020/myapp").build();
 
-	public static HttpServer startServer()
-	{
-		final ResourceConfig rc = new ResourceConfig().packages("org.nishen.resourcepartners");
-		return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
-	}
+	private HttpServer server;
 
 	public static void main(String[] args) throws Exception
 	{
-		SyncLauncher app = new SyncLauncher();
-		app.run();
+		SyncLauncher server = new SyncLauncher();
+
+		server.start();
+
+		log.info("Server started - hit enter to stop it.");
+
+		System.in.read();
+
+		server.stop();
 	}
 
-	public void run() throws IOException
+	public SyncLauncher()
 	{
-		// list for injector modules
-		List<Module> modules = new ArrayList<Module>();
+		log.debug("instantiated class: {}", this.getClass().getName());
+	}
 
-		// module (main configuration)
-		// modules.add(new ServletModule());
-		modules.add(new SyncModule());
+	public HttpServer start() throws IOException
+	{
+		log.info("starting service: {}", SERVICE_NAME);
 
-		// create the injector (guice)
-		log.debug("creating injector");
-		Injector injector = Guice.createInjector(modules);
+		// Create HttpServer
+		final HttpServer serverLocal = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, false);
 
-		// create the locator (hk2)
-		locator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
-		log.debug("item: {}", locator.getName());
+		final WebappContext context = new WebappContext(SERVICE_NAME, "/myapp");
+		context.addListener(SyncServletContextListener.class);
 
-		// link guice with hk2
-		GuiceBridge.getGuiceBridge().initializeGuiceBridge(locator);
-		GuiceIntoHK2Bridge guiceBridge = locator.getService(GuiceIntoHK2Bridge.class);
-		guiceBridge.bridgeGuiceInjector(injector);
+		// Initialize and register Jersey ServletContainer
+		ServletRegistration servletRegistration = context.addServlet("ServletContainer", ServletContainer.class);
+		servletRegistration.addMapping("/*");
+		servletRegistration.setInitParameter("javax.ws.rs.Application", "org.nishen.resourcepartners.SyncApp");
 
-		// start the server
-		final HttpServer server = startServer();
-		System.out.println(String.format("Jersey app started with WADL available at " +
-		                                 "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
-		System.in.read();
+		// Initialize and register GuiceFilter
+		final FilterRegistration registration = context.addFilter("GuiceFilter", GuiceFilter.class);
+		registration.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+
+		context.deploy(serverLocal);
+
+		serverLocal.start();
+
+		server = serverLocal;
+
+		return server;
+	}
+
+	public void stop() throws Exception
+	{
 		server.shutdown();
+	}
+
+	public URI getBaseUri()
+	{
+		return BASE_URI;
 	}
 }
