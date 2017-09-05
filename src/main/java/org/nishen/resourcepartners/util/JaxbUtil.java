@@ -69,6 +69,7 @@ public class JaxbUtil
 						marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
 						marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
 						marshaller.setProperty(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@");
+
 						marshallers.put(Thread.currentThread().getName(), marshaller);
 					}
 					catch (Exception e)
@@ -97,7 +98,7 @@ public class JaxbUtil
 						unmarshaller = context.createUnmarshaller();
 						unmarshaller.setProperty(UnmarshallerProperties.MEDIA_TYPE, "application/json");
 						unmarshaller.setProperty(UnmarshallerProperties.JSON_INCLUDE_ROOT, false);
-						unmarshaller.setProperty(UnmarshallerProperties.UNMARSHALLING_CASE_INSENSITIVE, true);
+						unmarshaller.setProperty(UnmarshallerProperties.UNMARSHALLING_CASE_INSENSITIVE, false);
 						unmarshaller.setProperty(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@");
 
 						unmarshallers.put(Thread.currentThread().getName(), unmarshaller);
@@ -150,6 +151,30 @@ public class JaxbUtil
 			Marshaller m = getMarshaller();
 
 			m.marshal(item, out);
+		}
+		catch (Exception e)
+		{
+			log.error("failed to obtain Address representation: {}", e.getMessage(), e);
+		}
+	}
+
+	public static <T> String formatPretty(T item)
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		formatPretty(item, out);
+
+		return new String(out.toByteArray());
+	}
+
+	public static <T> void formatPretty(T item, OutputStream out)
+	{
+		try
+		{
+			Marshaller m = getMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			m.marshal(item, out);
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
 		}
 		catch (Exception e)
 		{

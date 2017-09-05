@@ -8,7 +8,10 @@ import java.util.Properties;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.xml.bind.Marshaller;
 
+import org.eclipse.persistence.jaxb.MarshallerProperties;
+import org.eclipse.persistence.jaxb.UnmarshallerProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.nishen.resourcepartners.dao.Config;
 import org.nishen.resourcepartners.dao.ConfigFactory;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 
@@ -32,6 +36,8 @@ public class SyncModule extends AbstractModule
 	private static final Properties config = new Properties();
 
 	private WebTarget elasticTarget = null;
+
+	private WebTarget almaTarget = null;
 
 	@Override
 	protected void configure()
@@ -59,7 +65,7 @@ public class SyncModule extends AbstractModule
 		}
 
 		// bind instances
-		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class);
+		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class).in(Scopes.SINGLETON);
 
 		install(new FactoryModuleBuilder().implement(Config.class, ConfigImpl.class).build(ConfigFactory.class));
 	}
@@ -70,14 +76,35 @@ public class SyncModule extends AbstractModule
 	{
 		if (elasticTarget == null)
 		{
-			String usr = config.getProperty("ws.url.elastic.username");
-			String pwd = config.getProperty("ws.url.elastic.password");
+			String usr = config.getProperty("ws.elastic.usr");
+			String pwd = config.getProperty("ws.elastic.pwd");
 			HttpAuthenticationFeature auth = HttpAuthenticationFeature.basic(usr, pwd);
 
-			Client client = ClientBuilder.newClient().register(auth);
-			elasticTarget = client.target(config.getProperty("ws.url.elastic.index"));
+			Client client =
+			        ClientBuilder.newClient().register(auth).property(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
+			                     .property(UnmarshallerProperties.JSON_INCLUDE_ROOT, false)
+			                     .property(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
+			                     .property(Marshaller.JAXB_ENCODING, "UTF-8");
+
+			elasticTarget = client.target(config.getProperty("ws.elastic.url"));
 		}
 
 		return elasticTarget;
+	}
+
+	@Provides
+	@Named("ws.alma")
+	protected WebTarget provideWebTargetAlma()
+	{
+		String url = config.getProperty("ws.alma.url");
+
+		Client client = ClientBuilder.newClient();
+		if (almaTarget == null)
+		{
+			log.info("using alma api: {}", url);
+			almaTarget = client.target(url);
+		}
+
+		return almaTarget;
 	}
 }
