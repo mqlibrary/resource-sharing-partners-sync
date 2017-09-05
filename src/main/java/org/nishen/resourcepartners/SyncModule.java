@@ -13,6 +13,9 @@ import javax.xml.bind.Marshaller;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.jaxb.UnmarshallerProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.nishen.resourcepartners.dao.AlmaDAO;
+import org.nishen.resourcepartners.dao.AlmaDAOFactory;
+import org.nishen.resourcepartners.dao.AlmaDAOImpl;
 import org.nishen.resourcepartners.dao.Config;
 import org.nishen.resourcepartners.dao.ConfigFactory;
 import org.nishen.resourcepartners.dao.ConfigImpl;
@@ -26,6 +29,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 public class SyncModule extends AbstractModule
 {
@@ -66,8 +70,11 @@ public class SyncModule extends AbstractModule
 
 		// bind instances
 		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class).in(Scopes.SINGLETON);
+		bind(String.class).annotatedWith(Names.named("ws.alma.key")).toInstance(config.getProperty("ws.alma.key"));
 
-		install(new FactoryModuleBuilder().implement(Config.class, ConfigImpl.class).build(ConfigFactory.class));
+		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
+		install(factoryModuleBuilder.implement(Config.class, ConfigImpl.class).build(ConfigFactory.class));
+		install(factoryModuleBuilder.implement(AlmaDAO.class, AlmaDAOImpl.class).build(AlmaDAOFactory.class));
 	}
 
 	@Provides

@@ -3,6 +3,7 @@ package org.nishen.resourcepartners;
 import java.io.IOException;
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.logging.Level;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -30,6 +31,8 @@ public class SyncLauncher
 
 	public static void main(String[] args) throws Exception
 	{
+		java.util.logging.Logger.getLogger("org.glassfish.grizzly").setLevel(Level.WARNING);
+
 		SyncLauncher server = new SyncLauncher();
 
 		server.start();

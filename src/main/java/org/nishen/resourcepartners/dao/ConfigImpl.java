@@ -58,6 +58,8 @@ public class ConfigImpl implements Config
 		{
 			log.error("unable to load config [{}]: {}", configId, e.getMessage(), e);
 		}
+
+		log.debug("instantiated class: {}", this.getClass().getName());
 	}
 
 	@Override

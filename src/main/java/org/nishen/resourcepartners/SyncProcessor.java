@@ -9,6 +9,6 @@ public class SyncProcessor
 
 	public SyncProcessor()
 	{
-		
+		log.debug("instantiated class: {}", this.getClass().getName());
 	}
 }
