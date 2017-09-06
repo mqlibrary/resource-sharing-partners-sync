@@ -19,6 +19,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 
+import static org.junit.Assert.fail;
+
 public class TestAlmaDAO
 {
 	private static final Logger log = LoggerFactory.getLogger(TestAlmaDAO.class);
@@ -50,10 +52,17 @@ public class TestAlmaDAO
 	{
 		log.debug("running test: {}", Arrays.asList(new Throwable().getStackTrace()).get(0).getMethodName());
 
-		Map<String, Partner> partners = alma.getPartners();
-		for (Map.Entry<String, Partner> entry : partners.entrySet())
+		try
 		{
-			log.debug("{}: {}", entry.getKey(), entry.getValue().getPartnerDetails().getCode());
+			Map<String, Partner> partners = alma.getPartners();
+			for (Map.Entry<String, Partner> entry : partners.entrySet())
+			{
+				log.debug("{}: {}", entry.getKey(), entry.getValue().getPartnerDetails().getCode());
+			}
+		}
+		catch (SyncException e)
+		{
+			fail(e.getMessage());
 		}
 	}
 }

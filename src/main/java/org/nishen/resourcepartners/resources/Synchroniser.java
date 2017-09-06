@@ -12,6 +12,9 @@ import javax.ws.rs.core.Response;
 
 import org.nishen.resourcepartners.SyncProcessor;
 import org.nishen.resourcepartners.SyncProcessorFactory;
+import org.nishen.resourcepartners.model.ObjectFactory;
+import org.nishen.resourcepartners.model.Partner;
+import org.nishen.resourcepartners.model.Partners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Synchroniser
 {
 	private static final Logger log = LoggerFactory.getLogger(Synchroniser.class);
+
+	private ObjectFactory of = new ObjectFactory();
 
 	@Inject
 	private SyncProcessorFactory syncProcessorFactory;
@@ -32,6 +37,18 @@ public class Synchroniser
 
 		SyncProcessor sync = syncProcessorFactory.create(nuc, apikey);
 
-		return Response.ok("{ \"name\" : \"Sweet!\" }").build();
+		Partners partners = of.createPartners();
+
+		try
+		{
+			for (Partner p : sync.sync().get().values())
+				partners.getPartner().add(p);
+		}
+		catch (Exception e)
+		{
+			return Response.serverError().build();
+		}
+
+		return Response.ok(partners).build();
 	}
 }

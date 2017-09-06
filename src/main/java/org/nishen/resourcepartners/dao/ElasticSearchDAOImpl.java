@@ -19,6 +19,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
+import org.nishen.resourcepartners.SyncException;
 import org.nishen.resourcepartners.entity.ElasticSearchEntity;
 import org.nishen.resourcepartners.entity.ElasticSearchPartner;
 import org.nishen.resourcepartners.util.DataUtils;
@@ -66,11 +67,8 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	}
 
 	@Override
-	public Optional<ElasticSearchPartner> getPartner(String id) throws IOException
+	public Optional<ElasticSearchPartner> getPartner(String id) throws SyncException
 	{
-		if (!indices.contains("partners"))
-			createElasticSearchIndex("partners");
-
 		WebTarget t = elasticTarget.path("partners").path("partner").path(id).path("_source");
 
 		ElasticSearchPartner partner = null;
@@ -82,17 +80,18 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 		{
 			log.warn("partner does not exist: {}", id);
 		}
+		catch (Exception e)
+		{
+			throw new SyncException(e.getMessage());
+		}
 
 		return Optional.ofNullable(partner);
 	}
 
 	@Override
-	public Map<String, ElasticSearchPartner> getPartners() throws IOException
+	public Map<String, ElasticSearchPartner> getPartners() throws SyncException
 	{
 		Map<String, ElasticSearchPartner> partners = new HashMap<String, ElasticSearchPartner>();
-
-		if (!indices.contains("partners"))
-			createElasticSearchIndex("partners");
 
 		WebTarget t = elasticTarget.path("partners").path("partner").path("_search").queryParam("sort", "nuc")
 		                           .queryParam("size", SEARCH_SIZE);
@@ -117,13 +116,14 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 		catch (IOException ioe)
 		{
 			log.error("failed to parse json search results: {}", ioe.getMessage(), ioe);
+			throw new SyncException(ioe.getMessage());
 		}
 
 		return partners;
 	}
 
 	@Override
-	public void addEntity(ElasticSearchEntity esEntity) throws Exception
+	public void addEntity(ElasticSearchEntity esEntity) throws SyncException
 	{
 		List<ElasticSearchEntity> esEntities = new ArrayList<>();
 
@@ -133,7 +133,7 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	}
 
 	@Override
-	public void addEntities(Collection<? extends ElasticSearchEntity> esEntities) throws Exception
+	public void addEntities(Collection<? extends ElasticSearchEntity> esEntities) throws SyncException
 	{
 		if (esEntities == null || esEntities.size() == 0)
 		{
@@ -149,7 +149,16 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 		for (ElasticSearchEntity e : esEntities)
 		{
 			if (!indices.contains(e.getElasticSearchIndex()))
-				createElasticSearchIndex(e.getElasticSearchIndex());
+			{
+				try
+				{
+					createElasticSearchIndex(e.getElasticSearchIndex());
+				}
+				catch (Exception ex)
+				{
+					throw new SyncException(ex.getMessage());
+				}
+			}
 
 			String pattern = "{\"update\": { \"_index\": \"%s\", \"_type\": \"%s\", \"_id\": \"%s\"}}\n";
 			Object[] args = new String[3];

@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
+import org.nishen.resourcepartners.SyncException;
 import org.nishen.resourcepartners.model.Partner;
 import org.nishen.resourcepartners.model.Partners;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class AlmaDAOImpl implements AlmaDAO
 	}
 
 	@Override
-	public ConcurrentMap<String, Partner> getPartners()
+	public ConcurrentMap<String, Partner> getPartners() throws SyncException
 	{
 		ConcurrentMap<String, Partner> partnerMap = new ConcurrentHashMap<String, Partner>();
 
@@ -92,6 +93,7 @@ public class AlmaDAOImpl implements AlmaDAO
 		catch (ExecutionException ee)
 		{
 			log.error("execution failed: {}", ee.getMessage(), ee);
+			throw new SyncException(ee.getMessage());
 		}
 		catch (InterruptedException ie)
 		{

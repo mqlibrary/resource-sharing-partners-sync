@@ -1,13 +1,12 @@
 package org.nishen.resourcepartners.resources;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.nishen.resourcepartners.SyncException;
 import org.nishen.resourcepartners.dao.ElasticSearchDAO;
 import org.nishen.resourcepartners.entity.ElasticSearchPartner;
 import org.nishen.resourcepartners.util.JaxbUtil;
@@ -27,7 +26,7 @@ public class MyResource
 		{
 			p = elastic.getPartner("NMQU").get();
 		}
-		catch (IOException ioe)
+		catch (SyncException ioe)
 		{
 
 		}
