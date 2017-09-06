@@ -75,6 +75,8 @@ public class SyncModule extends AbstractModule
 		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
 		install(factoryModuleBuilder.implement(Config.class, ConfigImpl.class).build(ConfigFactory.class));
 		install(factoryModuleBuilder.implement(AlmaDAO.class, AlmaDAOImpl.class).build(AlmaDAOFactory.class));
+		install(factoryModuleBuilder.implement(SyncProcessor.class, SyncProcessorImpl.class)
+		                            .build(SyncProcessorFactory.class));
 	}
 
 	@Provides

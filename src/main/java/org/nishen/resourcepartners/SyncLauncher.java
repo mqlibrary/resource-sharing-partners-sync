@@ -25,7 +25,7 @@ public class SyncLauncher
 
 	private static final String SERVICE_NAME = "Resource Sharing Partners Sync Service";
 
-	private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:2020/myapp").build();
+	private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:2020/partner-sync").build();
 
 	private HttpServer server;
 
@@ -56,7 +56,7 @@ public class SyncLauncher
 		// Create HttpServer
 		final HttpServer serverLocal = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, false);
 
-		final WebappContext context = new WebappContext(SERVICE_NAME, "/myapp");
+		final WebappContext context = new WebappContext(SERVICE_NAME, "/partner-sync");
 		context.addListener(SyncServletContextListener.class);
 
 		// Initialize and register Jersey ServletContainer

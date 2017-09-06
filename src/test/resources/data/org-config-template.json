@@ -1,0 +1,22 @@
+{
+	"linkBase" : "",
+	"currency" : "",
+	"borrowingSupported": true,
+	"borrowingWorkflow" : "",
+	"lendingSupported": true,
+	"lendingWorkflow" : "",
+	"avgSupplyTime": 4,
+	"deliveryDelay": 4,
+	"locateProfileDesc" : "",
+	"locateProfileValue" : "",
+	"systemTypeDesc" : "",
+	"systemTypeValue" : "",
+	"isoAlternativeDocumentDelivery": false,
+	"isoIllServer" : "",
+	"isoIllPort" : "",
+	"isoRequestExpiryTypeDesc" : "",
+	"isoRequestExpiryTypeValue" : "",
+	"isoSendRequesterInformation": false,
+	"isoSharedBarcodes": true,
+	"isoSymbol": ""
+}

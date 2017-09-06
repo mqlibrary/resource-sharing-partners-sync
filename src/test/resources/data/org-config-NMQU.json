@@ -1,0 +1,22 @@
+{
+	"linkBase": "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/partners/",
+	"currency": "AUD",
+	"borrowingSupported": true,
+	"borrowingWorkflow": "LADD_Borrowing",
+	"lendingSupported": true,
+	"lendingWorkflow": "LADD_Lending",
+	"avgSupplyTime": 4,
+	"deliveryDelay": 4,
+	"locateProfileDesc": "LADD Locate Profile",
+	"locateProfileValue": "LADD",
+	"systemTypeDesc": "LADD",
+	"systemTypeValue": "LADD",
+	"isoAlternativeDocumentDelivery": false,
+	"isoIllServer": "nla.vdxhost.com",
+	"isoIllPort": "1612",
+	"isoRequestExpiryTypeDesc": "Expire by interest date",
+	"isoRequestExpiryTypeValue": "INTEREST_DATE",
+	"isoSendRequesterInformation": false,
+	"isoSharedBarcodes": true,
+	"isoSymbol": "NLA:NMQU"
+}
