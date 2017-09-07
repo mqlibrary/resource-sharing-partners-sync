@@ -1,6 +1,7 @@
 package org.nishen.resourcepartners;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class SyncProcessorImpl implements SyncProcessor
 	}
 
 	@Override
-	public Optional<Map<String, Partner>> sync() throws SyncException
+	public Optional<Map<String, Partner>> sync(boolean preview) throws SyncException
 	{
 		log.debug("sync nuc: {}", nuc);
 
@@ -86,15 +87,16 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		List<String> remaining = new ArrayList<String>(almaPartners.keySet());
 
+		// for (String s : Arrays.asList("QSCR:R", "WDET", "VALLE"))
 		for (String s : elasticPartners.keySet())
 		{
 			remaining.remove(s);
 
 			Partner a = makePartner(elasticPartners.get(s));
-			log.debug("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
+			log.trace("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
 
 			Partner b = almaPartners.get(s);
-			log.debug("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
+			log.trace("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
 
 			// we keep notes from Alma - source of truth for notes.
 			if (b != null)
@@ -122,20 +124,15 @@ public class SyncProcessorImpl implements SyncProcessor
 			for (String nuc : allChanges.keySet())
 				changeRecords.addAll(allChanges.get(nuc));
 
-			elastic.addEntities(changeRecords);
+			if (!preview)
+			{
+				elastic.addEntities(changeRecords);
+				alma.savePartners(changed);
+			}
 		}
 		catch (Exception e)
 		{
 			log.error("failed to save change records: {}", e.getMessage(), e);
-		}
-
-		try
-		{
-			alma.savePartners(changed);
-		}
-		catch (Exception e)
-		{
-			log.error("failed to save entities: {}", e.getMessage(), e);
 		}
 
 		return Optional.of(changed);
@@ -194,6 +191,12 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
+		for (Address address : b.getAddress())
+		{
+			Collections.sort(address.getAddressTypes().getAddressType());
+			address.setStartDate(null);
+		}
+
 		for (Address address : a.getAddress())
 			if (!b.getAddress().contains(address))
 				changes.add(new ElasticSearchChangeRecord(nuc, null, "address", null, JaxbUtilModel.format(address)));
@@ -226,6 +229,9 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
+		for (Email email : b.getEmail())
+			Collections.sort(email.getEmailTypes().getEmailType());
+
 		for (Email email : a.getEmail())
 			if (!b.getEmail().contains(email))
 				changes.add(new ElasticSearchChangeRecord(nuc, null, "email", null, JaxbUtilModel.format(email)));
@@ -257,6 +263,9 @@ public class SyncProcessorImpl implements SyncProcessor
 				changes.add(new ElasticSearchChangeRecord(nuc, null, "phone", null, JaxbUtilModel.format(phone)));
 			return changes;
 		}
+
+		for (Phone phone : b.getPhone())
+			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
 		for (Phone phone : a.getPhone())
 			if (!b.getPhone().contains(phone))
@@ -526,8 +535,11 @@ public class SyncProcessorImpl implements SyncProcessor
 
 			AddressTypes addressTypes = of.createAddressAddressTypes();
 			addressTypes.getAddressType().add(addressType);
+			a.getAddressDetail().setPreferred(false);
 
 			a.getAddressDetail().setAddressTypes(addressTypes);
+			Collections.sort(a.getAddressDetail().getAddressTypes().getAddressType());
+
 			addresses.getAddress().add(a.getAddressDetail());
 		}
 
@@ -542,6 +554,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
 			phone.setPhoneNumber(e.getPhoneMain());
+			phone.setPreferred(false);
+			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
 			phones.getPhone().add(phone);
 		}
@@ -557,6 +571,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
 			phone.setPhoneNumber(e.getPhoneIll());
+			phone.setPreferred(false);
+			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
 			phones.getPhone().add(phone);
 		}
@@ -572,6 +588,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
 			phone.setPhoneNumber(e.getPhoneFax());
+			phone.setPreferred(false);
+			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
 			phones.getPhone().add(phone);
 		}
@@ -587,6 +605,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			Email email = of.createEmail();
 			email.setEmailTypes(emailTypes);
 			email.setEmailAddress(e.getEmailMain());
+			email.setPreferred(false);
+			Collections.sort(email.getEmailTypes().getEmailType());
 
 			emails.getEmail().add(email);
 		}
@@ -599,6 +619,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			Email email = of.createEmail();
 			email.setEmailTypes(emailTypes);
 			email.setEmailAddress(e.getEmailIll());
+			email.setPreferred(false);
+			Collections.sort(email.getEmailTypes().getEmailType());
 
 			emails.getEmail().add(email);
 		}
@@ -608,6 +630,12 @@ public class SyncProcessorImpl implements SyncProcessor
 
 	private boolean isValidAddress(Address a)
 	{
+		if (a.getLine1() == null)
+			return false;
+
+		if (a.getCity() == null)
+			return false;
+
 		if (a.getLine1() != null && "same as".startsWith(a.getLine1().toLowerCase()))
 			return false;
 
@@ -615,9 +643,6 @@ public class SyncProcessorImpl implements SyncProcessor
 			return false;
 
 		if (a.getLine3() != null && "same as".startsWith(a.getLine3().toLowerCase()))
-			return false;
-
-		if (a.getCity() == null)
 			return false;
 
 		return true;

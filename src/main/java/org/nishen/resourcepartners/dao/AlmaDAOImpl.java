@@ -115,9 +115,12 @@ public class AlmaDAOImpl implements AlmaDAO
 
 			executor.shutdown();
 
+			
+			// TODO: null handling for partner and cache 
 			for (Future<Partner> future : partnerUpdates)
 			{
 				Partner partner = future.get();
+				cache.get(apikey).get().put(partner.getPartnerDetails().getCode(), partner);
 				log.debug("partner: {}", JaxbUtilModel.formatPretty(partner));
 			}
 		}

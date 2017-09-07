@@ -7,5 +7,5 @@ import org.nishen.resourcepartners.model.Partner;
 
 public interface SyncProcessor
 {
-	public Optional<Map<String, Partner>> sync() throws SyncException;
+	public Optional<Map<String, Partner>> sync(boolean preview) throws SyncException;
 }

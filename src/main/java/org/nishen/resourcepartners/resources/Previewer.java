@@ -18,10 +18,10 @@ import org.nishen.resourcepartners.model.Partners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("sync/{nuc}")
-public class Synchroniser
+@Path("preview/{nuc}")
+public class Previewer
 {
-	private static final Logger log = LoggerFactory.getLogger(Synchroniser.class);
+	private static final Logger log = LoggerFactory.getLogger(Previewer.class);
 
 	private ObjectFactory of = new ObjectFactory();
 
@@ -31,7 +31,7 @@ public class Synchroniser
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes("application/x-www-form-urlencoded")
-	public Response sync(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response preview(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
 	{
 		log.debug("nuc: {}, key: {}", nuc, apikey);
 
@@ -41,7 +41,7 @@ public class Synchroniser
 
 		try
 		{
-			for (Partner p : sync.sync(false).get().values())
+			for (Partner p : sync.sync(true).get().values())
 				partners.getPartner().add(p);
 		}
 		catch (Exception e)
