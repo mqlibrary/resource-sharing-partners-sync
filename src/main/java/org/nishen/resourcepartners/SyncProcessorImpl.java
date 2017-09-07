@@ -35,6 +35,7 @@ import org.nishen.resourcepartners.model.ProfileDetails;
 import org.nishen.resourcepartners.model.ProfileType;
 import org.nishen.resourcepartners.model.RequestExpiryType;
 import org.nishen.resourcepartners.model.Status;
+import org.nishen.resourcepartners.util.JaxbUtil;
 import org.nishen.resourcepartners.util.JaxbUtilModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,10 @@ public class SyncProcessorImpl implements SyncProcessor
 			remaining.remove(s);
 
 			Partner a = makePartner(elasticPartners.get(s));
+			log.debug("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
+
 			Partner b = almaPartners.get(s);
+			log.debug("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
 
 			// we keep notes from Alma - source of truth for notes.
 			if (b != null)
@@ -108,6 +112,32 @@ public class SyncProcessorImpl implements SyncProcessor
 			}
 		}
 
+		try
+		{
+			if (log.isDebugEnabled())
+				for (String nuc : allChanges.keySet())
+					log.debug("changes [{}]: {}", nuc, JaxbUtil.formatPretty(allChanges.get(nuc)));
+
+			List<ElasticSearchChangeRecord> changeRecords = new ArrayList<ElasticSearchChangeRecord>();
+			for (String nuc : allChanges.keySet())
+				changeRecords.addAll(allChanges.get(nuc));
+
+			elastic.addEntities(changeRecords);
+		}
+		catch (Exception e)
+		{
+			log.error("failed to save change records: {}", e.getMessage(), e);
+		}
+
+		try
+		{
+			alma.savePartners(changed);
+		}
+		catch (Exception e)
+		{
+			log.error("failed to save entities: {}", e.getMessage(), e);
+		}
+
 		return Optional.of(changed);
 	}
 
@@ -123,7 +153,7 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
-		if (compareStrings(a.getLink(), b.getLink()))
+		if (!compareStrings(a.getLink(), b.getLink()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "link", b.getLink(), a.getLink()));
 
 		changes.addAll(compareContactInfo(a.getContactInfo(), b.getContactInfo()));
@@ -268,14 +298,14 @@ public class SyncProcessorImpl implements SyncProcessor
 			                                          Boolean.toString(a.isBorrowingSupported()),
 			                                          Boolean.toString(a.isBorrowingSupported())));
 
-		if (compareStrings(a.getBorrowingWorkflow(), b.getBorrowingWorkflow()))
+		if (!compareStrings(a.getBorrowingWorkflow(), b.getBorrowingWorkflow()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "borrowingWorkflow", a.getBorrowingWorkflow(),
 			                                          b.getBorrowingWorkflow()));
 
-		if (compareStrings(a.getCode(), b.getCode()))
+		if (!compareStrings(a.getCode(), b.getCode()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "code", a.getCode(), b.getCode()));
 
-		if (compareStrings(a.getCurrency(), b.getCurrency()))
+		if (!compareStrings(a.getCurrency(), b.getCurrency()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "currency", a.getCurrency(), b.getCurrency()));
 
 		if (a.getDeliveryDelay() != b.getDeliveryDelay())
@@ -283,11 +313,11 @@ public class SyncProcessorImpl implements SyncProcessor
 			                                          Integer.toString(a.getDeliveryDelay()),
 			                                          Integer.toString(b.getDeliveryDelay())));
 
-		if (compareStrings(a.getHoldingCode(), b.getHoldingCode()))
+		if (!compareStrings(a.getHoldingCode(), b.getHoldingCode()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "holdingCode", a.getHoldingCode(),
 			                                          b.getHoldingCode()));
 
-		if (compareStrings(a.getInstitutionCode(), b.getInstitutionCode()))
+		if (!compareStrings(a.getInstitutionCode(), b.getInstitutionCode()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "institutionCode", a.getInstitutionCode(),
 			                                          b.getInstitutionCode()));
 
@@ -296,13 +326,13 @@ public class SyncProcessorImpl implements SyncProcessor
 			                                          Boolean.toString(a.isLendingSupported()),
 			                                          Boolean.toString(a.isLendingSupported())));
 
-		if (compareStrings(a.getLendingWorkflow(), b.getLendingWorkflow()))
+		if (!compareStrings(a.getLendingWorkflow(), b.getLendingWorkflow()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "lendingWorkflow", a.getLendingWorkflow(),
 			                                          b.getLendingWorkflow()));
 
 		changes.addAll(compareValueDescPair("locateProfile", a.getLocateProfile(), b.getLocateProfile()));
 
-		if (compareStrings(a.getName(), b.getName()))
+		if (!compareStrings(a.getName(), b.getName()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "name", a.getName(), b.getName()));
 
 		if (!a.getStatus().equals(b.getStatus()))
@@ -378,10 +408,10 @@ public class SyncProcessorImpl implements SyncProcessor
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllPort", Integer.toString(a.getIllPort()),
 			                                          Integer.toString(b.getIllPort())));
 
-		if (compareStrings(a.getIllServer(), b.getIllServer()))
+		if (!compareStrings(a.getIllServer(), b.getIllServer()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllServer", a.getIllServer(), b.getIllServer()));
 
-		if (compareStrings(a.getIsoSymbol(), b.getIsoSymbol()))
+		if (!compareStrings(a.getIsoSymbol(), b.getIsoSymbol()))
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoSymbol", a.getIsoSymbol(), b.getIsoSymbol()));
 
 		changes.addAll(compareValueDescPair("isoRequestExpiryType", a.getRequestExpiryType(),
@@ -483,6 +513,9 @@ public class SyncProcessorImpl implements SyncProcessor
 			if (!"active".equals(a.getAddressStatus()))
 				continue;
 
+			if (!isValidAddress(a.getAddressDetail()))
+				continue;
+
 			String addressType = a.getAddressType();
 			if ("billing".equals(addressType))
 				addressType = "billing";
@@ -571,5 +604,22 @@ public class SyncProcessorImpl implements SyncProcessor
 		}
 
 		return p;
+	}
+
+	private boolean isValidAddress(Address a)
+	{
+		if (a.getLine1() != null && "same as".startsWith(a.getLine1().toLowerCase()))
+			return false;
+
+		if (a.getLine2() != null && "same as".startsWith(a.getLine2().toLowerCase()))
+			return false;
+
+		if (a.getLine3() != null && "same as".startsWith(a.getLine3().toLowerCase()))
+			return false;
+
+		if (a.getCity() == null)
+			return false;
+
+		return true;
 	}
 }

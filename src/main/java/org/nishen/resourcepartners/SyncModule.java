@@ -16,6 +16,8 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.nishen.resourcepartners.dao.AlmaDAO;
 import org.nishen.resourcepartners.dao.AlmaDAOFactory;
 import org.nishen.resourcepartners.dao.AlmaDAOImpl;
+import org.nishen.resourcepartners.dao.Cache;
+import org.nishen.resourcepartners.dao.CacheImpl;
 import org.nishen.resourcepartners.dao.Config;
 import org.nishen.resourcepartners.dao.ConfigFactory;
 import org.nishen.resourcepartners.dao.ConfigImpl;
@@ -70,6 +72,7 @@ public class SyncModule extends AbstractModule
 
 		// bind instances
 		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class).in(Scopes.SINGLETON);
+		bind(Cache.class).to(CacheImpl.class).in(Scopes.SINGLETON);
 		bind(String.class).annotatedWith(Names.named("ws.alma.key")).toInstance(config.getProperty("ws.alma.key"));
 
 		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
