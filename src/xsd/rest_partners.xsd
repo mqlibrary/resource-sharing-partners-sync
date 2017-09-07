@@ -21,10 +21,11 @@
 			</xs:element>
 		</xs:sequence>
 
-		<xs:attribute name="total_record_count" type="xs:long">
-				<xs:annotation>
-					<xs:documentation>The total number of Resource Sharing Partners. This can be used when retrieving the partners list using pagination.</xs:documentation>
-				</xs:annotation>
+		<xs:attribute name="total_record_count" type="xs:int">
+			<xs:annotation>
+				<xs:documentation>The total number of partners. This can be used when
+					retrieving the list using pagination.</xs:documentation>
+			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 

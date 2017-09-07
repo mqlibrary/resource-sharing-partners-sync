@@ -352,6 +352,11 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 					<xs:documentation>The URL that is used to send patrons from Primo to the resource sharing library's Web site. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="general_broker_systemURL" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The URL that is used to send request from Alma to NCIP broker. Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="general_library_owner">
 				<xs:annotation>
 					<xs:documentation>The resource sharing library code that is supported for all actions. Mandatory.</xs:documentation>
@@ -504,6 +509,12 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 Configuration - Configuration menu - External Systems - Allowed Emails). Mandatory.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+
+			<xs:element name="resending_overdue_message_interval" type="xs:int" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The Interval (In days) that overdue message will be sent to partner. Must be a number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:all>
 	</xs:complexType>
 
@@ -550,6 +561,16 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>Indicates if local institution shares barcodes with the partner. Default is false.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="email_address" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The email address to which the Overdue email will be sent - Relvants only for SLNP type.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resending_overdue_message_interval" type="xs:int" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The Interval (In days) that the overdue message will be sent to partner. Must be a number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:all>
 	</xs:complexType>
 
@@ -592,6 +613,12 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>Indicates if to send patron information on the borrowing request. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+
+			<xs:element name="resending_overdue_message_interval" type="xs:int" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The Interval (In days) that the overdue message will be sent to partner. Must be a number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:all>
 	</xs:complexType>
 
@@ -602,7 +629,7 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 		<xs:all>
 			<xs:element name="bldss_base_url" type="xs:string">
 				<xs:annotation>
-					<xs:documentation>The BLDSS URL.Mandatory</xs:documentation>
+					<xs:documentation>The BLDSS URL. Mandatory.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="bldss_base_account" type="xs:string" >
@@ -613,6 +640,26 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 			<xs:element name="bldss_base_password" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>The BLDSS password.  Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element name="bldss_digital_format">
+               <xs:annotation>
+	               <xs:appinfo>
+	               		<xs:codeTable>BLDSSDigitalFormats</xs:codeTable>
+	               </xs:appinfo>
+	               <xs:documentation> The BLDSS digital format. Possible codes are listed in the &#8216;BLDSSDigitalFormats&#8217; code table.</xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+	               <xs:simpleContent>
+	                   <xs:extension base="xs:string">
+	                   		<xs:attribute name="desc" type="xs:string" use="optional" />
+	                   </xs:extension>
+	               </xs:simpleContent>
+               </xs:complexType>
+	         </xs:element>
+			<xs:element name="bldss_send_requester_info" type="xs:boolean" default="false">
+				<xs:annotation>
+					<xs:documentation>The BLDSS send requester Info.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:all>
