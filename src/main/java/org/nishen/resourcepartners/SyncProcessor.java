@@ -1,11 +1,10 @@
 package org.nishen.resourcepartners;
 
-import java.util.Map;
 import java.util.Optional;
 
-import org.nishen.resourcepartners.model.Partner;
+import org.nishen.resourcepartners.entity.SyncPayload;
 
 public interface SyncProcessor
 {
-	public Optional<Map<String, Partner>> sync(boolean preview) throws SyncException;
+	public Optional<SyncPayload> sync(boolean preview) throws SyncException;
 }

@@ -5,6 +5,8 @@ import java.util.Optional;
 
 public interface Config
 {
+	public boolean isEmpty();
+
 	public Map<String, String> getAll();
 
 	public Optional<String> get(String key);

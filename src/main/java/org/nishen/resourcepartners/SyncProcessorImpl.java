@@ -16,6 +16,7 @@ import org.nishen.resourcepartners.entity.ElasticSearchChangeRecord;
 import org.nishen.resourcepartners.entity.ElasticSearchPartner;
 import org.nishen.resourcepartners.entity.ElasticSearchPartnerAddress;
 import org.nishen.resourcepartners.entity.ElasticSearchSuspension;
+import org.nishen.resourcepartners.entity.SyncPayload;
 import org.nishen.resourcepartners.model.Address;
 import org.nishen.resourcepartners.model.Address.AddressTypes;
 import org.nishen.resourcepartners.model.Addresses;
@@ -64,7 +65,7 @@ public class SyncProcessorImpl implements SyncProcessor
 	public SyncProcessorImpl(ElasticSearchDAO elastic, AlmaDAOFactory almaFactory, ConfigFactory configFactory,
 	                         @Assisted("nuc") String nuc, @Assisted("apikey") String apikey)
 	{
-		this.config = configFactory.create(nuc);
+		this.config = configFactory.fetch(nuc, false);
 		this.elastic = elastic;
 		this.alma = almaFactory.create(apikey);
 		this.nuc = nuc;
@@ -73,36 +74,44 @@ public class SyncProcessorImpl implements SyncProcessor
 	}
 
 	@Override
-	public Optional<Map<String, Partner>> sync(boolean preview) throws SyncException
+	public Optional<SyncPayload> sync(boolean preview) throws SyncException
 	{
 		log.debug("sync nuc: {}", nuc);
 
-		Map<String, Partner> changed = new HashMap<String, Partner>();
+		if (config.isEmpty())
+			throw new SyncException("configuration does not exist: " + nuc);
 
 		Map<String, ElasticSearchPartner> elasticPartners = elastic.getPartners();
-		Map<String, Partner> almaPartners = alma.getPartners();
+		log.debug("elasticsearch partners found: {}", elasticPartners.size());
 
+		Map<String, Partner> almaPartners = alma.getPartners();
+		log.debug("alma partners found: {}", almaPartners.size());
+
+		Map<String, Partner> changed = new HashMap<String, Partner>();
+		Map<String, Partner> deleted = new HashMap<String, Partner>();
 		Map<String, List<ElasticSearchChangeRecord>> allChanges =
 		        new HashMap<String, List<ElasticSearchChangeRecord>>();
 
 		List<String> remaining = new ArrayList<String>(almaPartners.keySet());
-
-		// for (String s : Arrays.asList("QSCR:R", "WDET", "VALLE"))
 		for (String s : elasticPartners.keySet())
 		{
 			remaining.remove(s);
+
+			log.debug("processing org: {}", s);
 
 			Partner a = makePartner(elasticPartners.get(s));
 			log.trace("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
 
 			Partner b = almaPartners.get(s);
-			log.trace("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
+			log.debug("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
 
 			// we keep notes from Alma - source of truth for notes.
 			if (b != null)
 				a.setNotes(b.getNotes());
 
 			List<ElasticSearchChangeRecord> changes = comparePartners(a, b);
+			log.trace("comparing partners [{}], changecount: {}", s, changes.size());
+
 			if (changes.size() > 0)
 			{
 				// set the nuc (partner) that this change was made for
@@ -124,6 +133,9 @@ public class SyncProcessorImpl implements SyncProcessor
 			for (String nuc : allChanges.keySet())
 				changeRecords.addAll(allChanges.get(nuc));
 
+			for (String r : remaining)
+				deleted.put(r, almaPartners.get(r));
+
 			if (!preview)
 			{
 				elastic.addEntities(changeRecords);
@@ -135,7 +147,9 @@ public class SyncProcessorImpl implements SyncProcessor
 			log.error("failed to save change records: {}", e.getMessage(), e);
 		}
 
-		return Optional.of(changed);
+		log.debug("payload: changed={}, changes={}, deleted={}", changed.size(), allChanges.size(), deleted.size());
+
+		return Optional.of(new SyncPayload(changed, deleted, allChanges));
 	}
 
 	private List<ElasticSearchChangeRecord> comparePartners(Partner a, Partner b)
@@ -191,6 +205,9 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
+		// pre comparison work:
+		// - sorting because comparison order is critical.
+		// - address start date is not compared, elastic is null, so setting alma to null as well.
 		for (Address address : b.getAddress())
 		{
 			Collections.sort(address.getAddressTypes().getAddressType());
@@ -229,6 +246,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
+		// pre comparison work:
+		// - sorting because comparison order is critical.
 		for (Email email : b.getEmail())
 			Collections.sort(email.getEmailTypes().getEmailType());
 
@@ -264,6 +283,8 @@ public class SyncProcessorImpl implements SyncProcessor
 			return changes;
 		}
 
+		// pre comparison work:
+		// - sorting because comparison order is critical.
 		for (Phone phone : b.getPhone())
 			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
@@ -299,54 +320,54 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		if (a.getAvgSupplyTime() != b.getAvgSupplyTime())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "avgSupplyTime",
-			                                          Integer.toString(a.getAvgSupplyTime()),
-			                                          Integer.toString(b.getAvgSupplyTime())));
+			                                          Integer.toString(b.getAvgSupplyTime()),
+			                                          Integer.toString(a.getAvgSupplyTime())));
 
 		if (a.isBorrowingSupported() != b.isBorrowingSupported())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "borrowingSupported",
-			                                          Boolean.toString(a.isBorrowingSupported()),
+			                                          Boolean.toString(b.isBorrowingSupported()),
 			                                          Boolean.toString(a.isBorrowingSupported())));
 
 		if (!compareStrings(a.getBorrowingWorkflow(), b.getBorrowingWorkflow()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "borrowingWorkflow", a.getBorrowingWorkflow(),
-			                                          b.getBorrowingWorkflow()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "borrowingWorkflow", b.getBorrowingWorkflow(),
+			                                          a.getBorrowingWorkflow()));
 
 		if (!compareStrings(a.getCode(), b.getCode()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "code", a.getCode(), b.getCode()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "code", b.getCode(), a.getCode()));
 
 		if (!compareStrings(a.getCurrency(), b.getCurrency()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "currency", a.getCurrency(), b.getCurrency()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "currency", b.getCurrency(), a.getCurrency()));
 
 		if (a.getDeliveryDelay() != b.getDeliveryDelay())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "deliveryDelay",
-			                                          Integer.toString(a.getDeliveryDelay()),
-			                                          Integer.toString(b.getDeliveryDelay())));
+			                                          Integer.toString(b.getDeliveryDelay()),
+			                                          Integer.toString(a.getDeliveryDelay())));
 
 		if (!compareStrings(a.getHoldingCode(), b.getHoldingCode()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "holdingCode", a.getHoldingCode(),
-			                                          b.getHoldingCode()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "holdingCode", b.getHoldingCode(),
+			                                          a.getHoldingCode()));
 
 		if (!compareStrings(a.getInstitutionCode(), b.getInstitutionCode()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "institutionCode", a.getInstitutionCode(),
-			                                          b.getInstitutionCode()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "institutionCode", b.getInstitutionCode(),
+			                                          a.getInstitutionCode()));
 
 		if (a.isLendingSupported() != b.isLendingSupported())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "lendingSupported",
-			                                          Boolean.toString(a.isLendingSupported()),
+			                                          Boolean.toString(b.isLendingSupported()),
 			                                          Boolean.toString(a.isLendingSupported())));
 
 		if (!compareStrings(a.getLendingWorkflow(), b.getLendingWorkflow()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "lendingWorkflow", a.getLendingWorkflow(),
-			                                          b.getLendingWorkflow()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "lendingWorkflow", b.getLendingWorkflow(),
+			                                          a.getLendingWorkflow()));
 
 		changes.addAll(compareValueDescPair("locateProfile", a.getLocateProfile(), b.getLocateProfile()));
 
 		if (!compareStrings(a.getName(), b.getName()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "name", a.getName(), b.getName()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "name", b.getName(), a.getName()));
 
 		if (!a.getStatus().equals(b.getStatus()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "status", a.getStatus().toString(),
-			                                          b.getStatus().toString()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "status", b.getStatus().toString(),
+			                                          a.getStatus().toString()));
 
 		changes.addAll(compareValueDescPair("systemType", a.getSystemType(), b.getSystemType()));
 
@@ -410,35 +431,35 @@ public class SyncProcessorImpl implements SyncProcessor
 		}
 
 		if (a.getExpiryTime() != b.getExpiryTime())
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoExpiryTime", Integer.toString(a.getExpiryTime()),
-			                                          Integer.toString(b.getExpiryTime())));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoExpiryTime", Integer.toString(b.getExpiryTime()),
+			                                          Integer.toString(a.getExpiryTime())));
 
 		if (a.getIllPort() != b.getIllPort())
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllPort", Integer.toString(a.getIllPort()),
-			                                          Integer.toString(b.getIllPort())));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllPort", Integer.toString(b.getIllPort()),
+			                                          Integer.toString(a.getIllPort())));
 
 		if (!compareStrings(a.getIllServer(), b.getIllServer()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllServer", a.getIllServer(), b.getIllServer()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoIllServer", b.getIllServer(), a.getIllServer()));
 
 		if (!compareStrings(a.getIsoSymbol(), b.getIsoSymbol()))
-			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoSymbol", a.getIsoSymbol(), b.getIsoSymbol()));
+			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoSymbol", b.getIsoSymbol(), a.getIsoSymbol()));
 
 		changes.addAll(compareValueDescPair("isoRequestExpiryType", a.getRequestExpiryType(),
 		                                    b.getRequestExpiryType()));
 
 		if (a.isAlternativeDocumentDelivery() != b.isAlternativeDocumentDelivery())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoAlternativeDocumentDelivery",
-			                                          Boolean.toString(a.isAlternativeDocumentDelivery()),
+			                                          Boolean.toString(b.isAlternativeDocumentDelivery()),
 			                                          Boolean.toString(a.isAlternativeDocumentDelivery())));
 
 		if (a.isSendRequesterInformation() != b.isSendRequesterInformation())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoSendRequesterInformation",
-			                                          Boolean.toString(a.isSendRequesterInformation()),
+			                                          Boolean.toString(b.isSendRequesterInformation()),
 			                                          Boolean.toString(a.isSendRequesterInformation())));
 
 		if (a.isSharedBarcodes() != b.isSharedBarcodes())
 			changes.add(new ElasticSearchChangeRecord(nuc, null, "isoSharedBarcodes",
-			                                          Boolean.toString(a.isSharedBarcodes()),
+			                                          Boolean.toString(b.isSharedBarcodes()),
 			                                          Boolean.toString(a.isSharedBarcodes())));
 
 		return changes;

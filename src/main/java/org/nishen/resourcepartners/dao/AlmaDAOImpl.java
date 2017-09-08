@@ -41,16 +41,17 @@ public class AlmaDAOImpl implements AlmaDAO
 
 	private static final ObjectFactory of = new ObjectFactory();
 
-	private Cache cache;
+	private Cache<ConcurrentMap<String, Partner>> cache;
 
 	private WebTarget target;
 
 	private String apikey;
 
 	@Inject
-	public AlmaDAOImpl(Cache cache, @Named("ws.alma") Provider<WebTarget> webTargetProvider, @Assisted String apikey)
+	public AlmaDAOImpl(Provider<Cache<ConcurrentMap<String, Partner>>> cacheProvider,
+	                   @Named("ws.alma") Provider<WebTarget> webTargetProvider, @Assisted String apikey)
 	{
-		this.cache = cache;
+		this.cache = cacheProvider.get();
 
 		this.apikey = apikey;
 
@@ -115,8 +116,7 @@ public class AlmaDAOImpl implements AlmaDAO
 
 			executor.shutdown();
 
-			
-			// TODO: null handling for partner and cache 
+			// TODO: null handling for partner and cache
 			for (Future<Partner> future : partnerUpdates)
 			{
 				Partner partner = future.get();

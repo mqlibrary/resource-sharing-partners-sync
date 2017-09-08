@@ -6,29 +6,29 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.nishen.resourcepartners.model.Partner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CacheImpl implements Cache
+public class CacheImpl<T> implements Cache<T>
 {
 	private static final Logger log = LoggerFactory.getLogger(CacheImpl.class);
 
 	private static final long CACHE_TTL = 1800;
 
 	private ConcurrentMap<String, LocalDateTime> cacheExpire;
-	
-	private ConcurrentMap<String, ConcurrentMap<String, Partner>> cache;
+
+	private ConcurrentMap<String, T> cache;
 
 	public CacheImpl()
 	{
-		cache = new ConcurrentHashMap<String, ConcurrentMap<String, Partner>>();
+		cache = new ConcurrentHashMap<String, T>();
 		cacheExpire = new ConcurrentHashMap<String, LocalDateTime>();
 
 		log.debug("instantiated class: {}", this.getClass().getName());
 	}
 
-	public Optional<ConcurrentMap<String, Partner>> get(String key)
+	@Override
+	public Optional<T> get(String key)
 	{
 		if (!cacheExpire.containsKey(key) || LocalDateTime.now().isAfter(cacheExpire.get(key)))
 			return Optional.empty();
@@ -36,9 +36,24 @@ public class CacheImpl implements Cache
 		return Optional.ofNullable(cache.get(key));
 	}
 
-	public void put(String key, ConcurrentMap<String, Partner> value)
+	@Override
+	public void put(String key, T value)
 	{
 		cacheExpire.put(key, LocalDateTime.now().plus(CACHE_TTL, ChronoUnit.SECONDS));
 		cache.put(key, value);
+	}
+
+	@Override
+	public void expire(String key)
+	{
+		cacheExpire.remove(key);
+		cache.remove(key);
+	}
+
+	@Override
+	public void expireAll()
+	{
+		cacheExpire.clear();
+		cache.clear();
 	}
 }

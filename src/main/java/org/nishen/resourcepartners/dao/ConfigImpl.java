@@ -36,7 +36,8 @@ public class ConfigImpl implements Config
 	private ObjectMapper om = new ObjectMapper();
 
 	@Inject
-	public ConfigImpl(@Named("ws.elastic") Provider<WebTarget> elasticTargetProvider, @Assisted String configId)
+	public ConfigImpl(@Named("ws.elastic") Provider<WebTarget> elasticTargetProvider, @Assisted String configId,
+	                  @Assisted boolean createIfAbsent)
 	{
 		this.elasticTarget = elasticTargetProvider.get();
 		this.configId = configId;
@@ -48,7 +49,7 @@ public class ConfigImpl implements Config
 			{
 				this.config.putAll(fetched.get());
 			}
-			else
+			else if (createIfAbsent)
 			{
 				saveConfig();
 				log.info("created config: {}", configId);
@@ -56,10 +57,16 @@ public class ConfigImpl implements Config
 		}
 		catch (Exception e)
 		{
-			log.error("unable to load config [{}]: {}", configId, e.getMessage(), e);
+			log.error("error creating configuration [{}]: {}", configId, e.getMessage(), e);
 		}
 
 		log.debug("instantiated class: {}", this.getClass().getName());
+	}
+
+	@Override
+	public boolean isEmpty()
+	{
+		return config.isEmpty();
 	}
 
 	@Override

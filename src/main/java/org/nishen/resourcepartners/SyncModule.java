@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,6 +24,8 @@ import org.nishen.resourcepartners.dao.ConfigFactory;
 import org.nishen.resourcepartners.dao.ConfigImpl;
 import org.nishen.resourcepartners.dao.ElasticSearchDAO;
 import org.nishen.resourcepartners.dao.ElasticSearchDAOImpl;
+import org.nishen.resourcepartners.entity.SyncPayload;
+import org.nishen.resourcepartners.model.Partner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +47,10 @@ public class SyncModule extends AbstractModule
 	private WebTarget elasticTarget = null;
 
 	private WebTarget almaTarget = null;
+
+	private Cache<ConcurrentMap<String, Partner>> partnerCache = null;
+
+	private Cache<SyncPayload> syncPayloadCache = null;
 
 	@Override
 	protected void configure()
@@ -72,6 +79,7 @@ public class SyncModule extends AbstractModule
 
 		// bind instances
 		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class).in(Scopes.SINGLETON);
+
 		bind(Cache.class).to(CacheImpl.class).in(Scopes.SINGLETON);
 		bind(String.class).annotatedWith(Names.named("ws.alma.key")).toInstance(config.getProperty("ws.alma.key"));
 
@@ -118,5 +126,23 @@ public class SyncModule extends AbstractModule
 		}
 
 		return almaTarget;
+	}
+
+	@Provides
+	protected Cache<ConcurrentMap<String, Partner>> providePartnerCache()
+	{
+		if (partnerCache == null)
+			partnerCache = new CacheImpl<ConcurrentMap<String, Partner>>();
+
+		return partnerCache;
+	}
+
+	@Provides
+	protected Cache<SyncPayload> provideSyncPayloadCache()
+	{
+		if (syncPayloadCache == null)
+			syncPayloadCache = new CacheImpl<SyncPayload>();
+
+		return syncPayloadCache;
 	}
 }
