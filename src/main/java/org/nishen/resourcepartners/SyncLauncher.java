@@ -25,7 +25,7 @@ public class SyncLauncher
 
 	private static final String SERVICE_NAME = "Resource Sharing Partners Sync Service";
 
-	private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:2020/partner-sync").build();
+	private static final URI BASE_URI = UriBuilder.fromUri("http://0.0.0.0:2020/partner-sync").build();
 
 	private HttpServer server;
 
@@ -52,7 +52,7 @@ public class SyncLauncher
 	public HttpServer start() throws IOException
 	{
 		log.info("starting service: {}", SERVICE_NAME);
-
+		
 		// Create HttpServer
 		final HttpServer serverLocal = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, false);
 
@@ -73,6 +73,8 @@ public class SyncLauncher
 		serverLocal.start();
 
 		server = serverLocal;
+
+		log.info("serving at: {}", BASE_URI.toString());
 
 		return server;
 	}

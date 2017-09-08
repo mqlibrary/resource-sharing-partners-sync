@@ -97,6 +97,10 @@ public class SyncProcessorImpl implements SyncProcessor
 		{
 			remaining.remove(s);
 
+			// skip own org
+			if (s.equals(nuc))
+				continue;
+
 			log.debug("processing org: {}", s);
 
 			Partner a = makePartner(elasticPartners.get(s));
