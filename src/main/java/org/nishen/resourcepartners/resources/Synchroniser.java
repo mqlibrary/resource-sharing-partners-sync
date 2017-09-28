@@ -5,9 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -46,19 +45,29 @@ public class Synchroniser
 		this.syncProcessorFactory = syncProcessorFactory;
 	}
 
-	@Path("sync")
-	@POST
+	@Path("test")
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response sync(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response test(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
-		log.debug("[sync] nuc: {}, key: {}", nuc, apikey);
+		log.debug("[test] nuc: {}, authorization: {}", nuc, authorization);
+
+		return Response.ok().entity(String.format("{ \"Authorization\" : \"%s...\"}", authorization.substring(0, 10)))
+		               .build();
+	}
+
+	@Path("sync")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sync(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
+	{
+		log.debug("[sync] nuc: {}, key: {}", nuc, authorization);
 
 		Partners partners = of.createPartners();
 
 		try
 		{
-			SyncProcessor sync = syncProcessorFactory.create(nuc, apikey);
+			SyncProcessor sync = syncProcessorFactory.create(nuc, authorization);
 			SyncPayload payload = sync.sync(false).get();
 			for (Partner p : payload.getChanged().values())
 				partners.getPartner().add(p);
@@ -79,18 +88,17 @@ public class Synchroniser
 	}
 
 	@Path("preview")
-	@POST
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response preview(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response preview(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
-		log.debug("[preview] nuc: {}, key: {}", nuc, apikey);
+		log.debug("[preview] nuc: {}, key: {}", nuc, authorization);
 
 		Partners partners = of.createPartners();
 
 		try
 		{
-			SyncProcessor sync = syncProcessorFactory.create(nuc, apikey);
+			SyncProcessor sync = syncProcessorFactory.create(nuc, authorization);
 			SyncPayload payload = sync.sync(true).get();
 			for (Partner p : payload.getChanged().values())
 				partners.getPartner().add(p);
@@ -111,18 +119,17 @@ public class Synchroniser
 	}
 
 	@Path("changes")
-	@POST
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response changes(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response changes(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
-		log.debug("[changes] nuc: {}, key: {}", nuc, apikey);
+		log.debug("[changes] nuc: {}, key: {}", nuc, authorization);
 
 		List<ElasticSearchChangeRecord> changes = new ArrayList<ElasticSearchChangeRecord>();
 
 		try
 		{
-			SyncProcessor sync = syncProcessorFactory.create(nuc, apikey);
+			SyncProcessor sync = syncProcessorFactory.create(nuc, authorization);
 			SyncPayload payload = sync.sync(true).get();
 			for (List<ElasticSearchChangeRecord> changeList : payload.getChanges().values())
 				changes.addAll(changeList);
@@ -146,18 +153,17 @@ public class Synchroniser
 	}
 
 	@Path("orphaned")
-	@POST
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response orphaned(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response orphaned(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
-		log.debug("[orphaned] nuc: {}, key: {}", nuc, apikey);
+		log.debug("[orphaned] nuc: {}, key: {}", nuc, authorization);
 
 		Partners partners = of.createPartners();
 
 		try
 		{
-			SyncProcessor sync = syncProcessorFactory.create(nuc, apikey);
+			SyncProcessor sync = syncProcessorFactory.create(nuc, authorization);
 			SyncPayload payload = sync.sync(true).get();
 			for (Partner p : payload.getDeleted().values())
 				partners.getPartner().add(p);
@@ -178,14 +184,13 @@ public class Synchroniser
 	}
 
 	@Path("expirecache")
-	@POST
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response expireCache(@PathParam("nuc") String nuc, @FormParam("apikey") String apikey)
+	public Response expireCache(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
-		log.debug("[expireCache] nuc: {}, key: {}", nuc, apikey);
+		log.debug("[expireCache] nuc: {}, key: {}", nuc, authorization);
 
-		cache.expire(apikey);
+		cache.expire(authorization);
 
 		return Response.ok().build();
 	}
