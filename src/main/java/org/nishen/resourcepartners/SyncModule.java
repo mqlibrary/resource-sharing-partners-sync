@@ -118,9 +118,9 @@ public class SyncModule extends AbstractModule
 	{
 		String url = config.getProperty("ws.alma.url");
 
-		Client client = ClientBuilder.newClient();
 		if (almaTarget == null)
 		{
+			Client client = ClientBuilder.newClient();
 			log.info("using alma api: {}", url);
 			almaTarget = client.target(url);
 		}

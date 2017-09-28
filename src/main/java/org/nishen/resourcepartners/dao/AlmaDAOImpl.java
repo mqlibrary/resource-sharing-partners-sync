@@ -98,7 +98,7 @@ public class AlmaDAOImpl implements AlmaDAO
 
 	public void savePartners(Map<String, Partner> partners) throws SyncException
 	{
-		WebTarget t = target.path("partners").queryParam("apikey", apikey);
+		WebTarget t = target.path("partners");
 
 		List<Future<Partner>> partnerUpdates = new ArrayList<Future<Partner>>();
 
@@ -202,7 +202,8 @@ public class AlmaDAOImpl implements AlmaDAO
 		public Partners call() throws Exception
 		{
 			WebTarget t = target.queryParam("limit", LIMIT).queryParam("offset", offset);
-			Partners partners = t.request(MediaType.APPLICATION_XML).get(Partners.class);
+			Partners partners =
+			        t.request(MediaType.APPLICATION_XML).header("Authorization", apikey).get(Partners.class);
 
 			log.debug("fetchResourcePartners [offset]: {}", offset);
 
@@ -244,11 +245,12 @@ public class AlmaDAOImpl implements AlmaDAO
 			{
 				if (update)
 				{
-					result = target.path(code).request(m).put(Entity.entity(p, m), Partner.class);
+					result = target.path(code).request(m).header("Authorization", apikey).put(Entity.entity(p, m),
+					                                                                          Partner.class);
 				}
 				else
 				{
-					result = target.request(m).post(Entity.entity(p, m), Partner.class);
+					result = target.request(m).header("Authorization", apikey).post(Entity.entity(p, m), Partner.class);
 				}
 			}
 			catch (Exception e)
