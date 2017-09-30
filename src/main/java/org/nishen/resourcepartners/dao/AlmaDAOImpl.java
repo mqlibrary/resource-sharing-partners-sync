@@ -201,9 +201,10 @@ public class AlmaDAOImpl implements AlmaDAO
 		@Override
 		public Partners call() throws Exception
 		{
+			String m = MediaType.APPLICATION_XML;
+
 			WebTarget t = target.queryParam("limit", LIMIT).queryParam("offset", offset);
-			Partners partners =
-			        t.request(MediaType.APPLICATION_XML).header("Authorization", apikey).get(Partners.class);
+			Partners partners = t.request(m).accept(m).header("Authorization", apikey).get(Partners.class);
 
 			log.debug("fetchResourcePartners [offset]: {}", offset);
 
@@ -245,12 +246,13 @@ public class AlmaDAOImpl implements AlmaDAO
 			{
 				if (update)
 				{
-					result = target.path(code).request(m).header("Authorization", apikey).put(Entity.entity(p, m),
-					                                                                          Partner.class);
+					result = target.path(code).request(m).accept(m).header("Authorization", apikey)
+					               .put(Entity.entity(p, m), Partner.class);
 				}
 				else
 				{
-					result = target.request(m).header("Authorization", apikey).post(Entity.entity(p, m), Partner.class);
+					result = target.request(m).accept(m).header("Authorization", apikey).post(Entity.entity(p, m),
+					                                                                          Partner.class);
 				}
 			}
 			catch (Exception e)

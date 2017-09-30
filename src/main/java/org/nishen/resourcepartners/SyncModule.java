@@ -1,9 +1,5 @@
 package org.nishen.resourcepartners;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.client.Client;
@@ -14,6 +10,9 @@ import javax.xml.bind.Marshaller;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.jaxb.UnmarshallerProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.jaxb.internal.JaxbMessagingBinder;
+import org.glassfish.jersey.jaxb.internal.JaxbParamConverterBinder;
+import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
 import org.nishen.resourcepartners.dao.AlmaDAO;
 import org.nishen.resourcepartners.dao.AlmaDAOFactory;
 import org.nishen.resourcepartners.dao.AlmaDAOImpl;
@@ -32,56 +31,21 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 
 public class SyncModule extends AbstractModule
 {
 	private static final Logger log = LoggerFactory.getLogger(SyncModule.class);
 
-	private static final String CONFIG_FILE = "app.properties";
-
-	private static final Properties config = new Properties();
-
-	private WebTarget elasticTarget = null;
-
-	private WebTarget almaTarget = null;
-
-	private Cache<ConcurrentMap<String, Partner>> partnerCache = null;
-
-	private Cache<SyncPayload> syncPayloadCache = null;
-
 	@Override
 	protected void configure()
 	{
-		String configFilename = CONFIG_FILE;
-		if (System.getProperty("config") != null)
-			configFilename = System.getProperty("config");
-
-		File configFile = new File(configFilename);
-		try
-		{
-			if (!configFile.exists() || !configFile.canRead())
-				throw new IOException("cannot read config file: " + configFile.getAbsolutePath());
-
-			config.load(new FileReader(configFile));
-
-			if (log.isDebugEnabled())
-				for (String k : config.stringPropertyNames())
-					log.debug("{}: {}={}", new Object[] { CONFIG_FILE, k, config.getProperty(k) });
-		}
-		catch (IOException e)
-		{
-			log.error("unable to load configuration: {}", configFile.getAbsoluteFile(), e);
-			return;
-		}
-
 		// bind instances
 		bind(ElasticSearchDAO.class).to(ElasticSearchDAOImpl.class).in(Scopes.SINGLETON);
 
 		bind(Cache.class).to(CacheImpl.class).in(Scopes.SINGLETON);
-		bind(String.class).annotatedWith(Names.named("ws.alma.key")).toInstance(config.getProperty("ws.alma.key"));
 
 		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
 		install(factoryModuleBuilder.implement(Config.class, ConfigImpl.class).build(ConfigFactory.class));
@@ -91,57 +55,55 @@ public class SyncModule extends AbstractModule
 	}
 
 	@Provides
+	@Singleton
 	@Named("ws.elastic")
 	protected WebTarget provideWebTargetElastic()
 	{
-		if (elasticTarget == null)
-		{
-			String usr = config.getProperty("ws.elastic.usr");
-			String pwd = config.getProperty("ws.elastic.pwd");
-			HttpAuthenticationFeature auth = HttpAuthenticationFeature.basic(usr, pwd);
+		String usr = System.getenv("ELASTIC_USR");
+		String pwd = System.getenv("ELASTIC_PWD");
+		HttpAuthenticationFeature auth = HttpAuthenticationFeature.basic(usr, pwd);
 
-			Client client =
-			        ClientBuilder.newClient().register(auth).property(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
-			                     .property(UnmarshallerProperties.JSON_INCLUDE_ROOT, false)
-			                     .property(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
-			                     .property(Marshaller.JAXB_ENCODING, "UTF-8");
+		Client client = ClientBuilder.newClient().register(new JaxbMessagingBinder())
+		                             .register(new JaxbParamConverterBinder()).register(new MoxyJsonFeature())
+		                             .register(auth).property(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
+		                             .property(UnmarshallerProperties.JSON_INCLUDE_ROOT, false)
+		                             .property(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
+		                             .property(Marshaller.JAXB_ENCODING, "UTF-8");
 
-			elasticTarget = client.target(config.getProperty("ws.elastic.url"));
-		}
+		WebTarget elasticTarget = client.target(System.getenv("ELASTIC_URL"));
 
 		return elasticTarget;
 	}
 
 	@Provides
+	@Singleton
 	@Named("ws.alma")
 	protected WebTarget provideWebTargetAlma()
 	{
-		String url = config.getProperty("ws.alma.url");
+		String url = System.getenv("ALMA_URL");
 
-		if (almaTarget == null)
-		{
-			Client client = ClientBuilder.newClient();
-			log.info("using alma api: {}", url);
-			almaTarget = client.target(url);
-		}
+		Client client =
+		        ClientBuilder.newClient().register(new JaxbMessagingBinder()).register(new JaxbParamConverterBinder());
+		log.info("using alma api: {}", url);
+		WebTarget almaTarget = client.target(url);
 
 		return almaTarget;
 	}
 
 	@Provides
+	@Singleton
 	protected Cache<ConcurrentMap<String, Partner>> providePartnerCache()
 	{
-		if (partnerCache == null)
-			partnerCache = new CacheImpl<ConcurrentMap<String, Partner>>();
+		Cache<ConcurrentMap<String, Partner>> partnerCache = new CacheImpl<ConcurrentMap<String, Partner>>();
 
 		return partnerCache;
 	}
 
 	@Provides
+	@Singleton
 	protected Cache<SyncPayload> provideSyncPayloadCache()
 	{
-		if (syncPayloadCache == null)
-			syncPayloadCache = new CacheImpl<SyncPayload>();
+		Cache<SyncPayload> syncPayloadCache = new CacheImpl<SyncPayload>();
 
 		return syncPayloadCache;
 	}
