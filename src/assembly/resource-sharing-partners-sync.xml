@@ -25,5 +25,23 @@
 			<lineEnding>dos</lineEnding>
 			<filtered>true</filtered>
 		</fileSet>
+		<fileSet>
+			<directory>src/scripts</directory>
+			<outputDirectory />
+			<includes>
+				<include>*.sh</include>
+			</includes>
+			<lineEnding>unix</lineEnding>
+			<filtered>true</filtered>
+		</fileSet>
+		<fileSet>
+			<directory>src/scripts</directory>
+			<outputDirectory />
+			<includes>
+				<include>*.cmd</include>
+			</includes>
+			<lineEnding>dos</lineEnding>
+			<filtered>true</filtered>
+		</fileSet>
 	</fileSets>
 </assembly>
