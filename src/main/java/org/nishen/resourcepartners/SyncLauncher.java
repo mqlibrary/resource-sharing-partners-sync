@@ -27,7 +27,7 @@ public class SyncLauncher
 
 	private static final String SERVICE_NAME = "Resource Sharing Partners Sync Service";
 
-	private HttpServer server;
+	private static HttpServer syncServer;
 
 	public static void main(String[] args) throws Exception
 	{
@@ -77,13 +77,20 @@ public class SyncLauncher
 
 		SyncLauncher server = new SyncLauncher();
 
-		server.start(syncHost, syncPort, syncPath);
+		syncServer = server.start(syncHost, syncPort, syncPath);
 
 		log.info("Server started - hit enter to stop it.");
 
-		System.in.read();
+		try
+		{
+			Thread.currentThread().join();
+		}
+		catch (InterruptedException ie)
+		{
+			log.info("Server interrupted");
+		}
 
-		server.stop();
+		syncServer.shutdown();
 
 		log.info("Server stopped.");
 	}
@@ -118,15 +125,8 @@ public class SyncLauncher
 
 		serverLocal.start();
 
-		server = serverLocal;
-
 		log.info("serving at: {}", BASE_URI.toString());
 
-		return server;
-	}
-
-	public void stop() throws Exception
-	{
-		server.shutdown();
+		return serverLocal;
 	}
 }
