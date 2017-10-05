@@ -1,7 +1,12 @@
 package org.nishen.resourcepartners;
 
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -57,18 +62,33 @@ public class SyncModule extends AbstractModule
 	@Provides
 	@Singleton
 	@Named("ws.elastic")
-	protected WebTarget provideWebTargetElastic()
+	protected WebTarget provideWebTargetElastic() throws Exception
 	{
 		String usr = System.getenv("ELASTIC_USR");
 		String pwd = System.getenv("ELASTIC_PWD");
 		HttpAuthenticationFeature auth = HttpAuthenticationFeature.basic(usr, pwd);
 
-		Client client = ClientBuilder.newClient().register(new JaxbMessagingBinder())
-		                             .register(new JaxbParamConverterBinder()).register(new MoxyJsonFeature())
-		                             .register(auth).property(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
+		SSLContext sslcontext = SSLContext.getInstance("TLS");
+		sslcontext.init(null, new TrustManager[] { new X509TrustManager() {
+			public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
+			{}
+
+			public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
+			{}
+
+			public X509Certificate[] getAcceptedIssuers()
+			{
+				return new X509Certificate[0];
+			}
+		} }, new java.security.SecureRandom());
+
+		Client client = ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true)
+		                             .register(new JaxbMessagingBinder()).register(new JaxbParamConverterBinder())
+		                             .register(new MoxyJsonFeature()).register(auth)
+		                             .property(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
 		                             .property(UnmarshallerProperties.JSON_INCLUDE_ROOT, false)
 		                             .property(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@")
-		                             .property(Marshaller.JAXB_ENCODING, "UTF-8");
+		                             .property(Marshaller.JAXB_ENCODING, "UTF-8").build();
 
 		WebTarget elasticTarget = client.target(System.getenv("ELASTIC_URL"));
 
