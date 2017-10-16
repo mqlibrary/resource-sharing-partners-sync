@@ -116,13 +116,14 @@ public class AlmaDAOImpl implements AlmaDAO
 
 			executor.shutdown();
 
-			// TODO: null handling for partner and cache
 			for (Future<Partner> future : partnerUpdates)
 			{
 				Partner partner = future.get();
-				cache.get(apikey).get().put(partner.getPartnerDetails().getCode(), partner);
 				log.debug("partner: {}", JaxbUtilModel.formatPretty(partner));
 			}
+
+			// after we've saved data to Alma, cache is now stale.
+			cache.expire(apikey);
 		}
 		catch (Exception e)
 		{
@@ -246,13 +247,12 @@ public class AlmaDAOImpl implements AlmaDAO
 			{
 				if (update)
 				{
-					result = target.path(code).request(m).accept(m).header("Authorization", apikey)
-					               .put(Entity.entity(p, m), Partner.class);
+					result = target.path(code).request(m).header("Authorization", apikey).put(Entity.entity(p, m),
+					                                                                          Partner.class);
 				}
 				else
 				{
-					result = target.request(m).accept(m).header("Authorization", apikey).post(Entity.entity(p, m),
-					                                                                          Partner.class);
+					result = target.request(m).header("Authorization", apikey).post(Entity.entity(p, m), Partner.class);
 				}
 			}
 			catch (Exception e)
