@@ -53,8 +53,11 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 		try
 		{
 			indices = getElasticSearchIndices();
-			createElasticSearchIndex("config");
-			createElasticSearchIndex("partners");
+
+			createElasticSearchIndex(Config.ES_INDEX);
+
+			ElasticSearchPartner configPartner = new ElasticSearchPartner();
+			createElasticSearchIndex(configPartner.getElasticSearchIndex());
 		}
 		catch (IOException ioe)
 		{
@@ -69,7 +72,10 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	@Override
 	public Optional<ElasticSearchPartner> getPartner(String id) throws SyncException
 	{
-		WebTarget t = elasticTarget.path("partners").path("partner").path(id).path("_source");
+		ElasticSearchPartner configInfo = new ElasticSearchPartner();
+
+		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex()).path(configInfo.getElasticSearchType())
+		                           .path(id).path("_source");
 
 		ElasticSearchPartner partner = null;
 		try
@@ -93,8 +99,10 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	{
 		Map<String, ElasticSearchPartner> partners = new HashMap<String, ElasticSearchPartner>();
 
-		WebTarget t = elasticTarget.path("partners").path("partner").path("_search").queryParam("sort", "nuc")
-		                           .queryParam("size", SEARCH_SIZE);
+		ElasticSearchPartner configInfo = new ElasticSearchPartner();
+
+		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex()).path(configInfo.getElasticSearchType())
+		                           .path("_search").queryParam("sort", "nuc").queryParam("size", SEARCH_SIZE);
 
 		String result = t.request().accept(MediaType.APPLICATION_JSON).get(String.class);
 

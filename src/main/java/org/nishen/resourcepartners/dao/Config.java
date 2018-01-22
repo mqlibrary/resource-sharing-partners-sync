@@ -5,6 +5,10 @@ import java.util.Optional;
 
 public interface Config
 {
+	public static final String ES_INDEX = "partner-configs";
+	
+	public static final String ES_TYPE = "config"; 
+	
 	public boolean isEmpty();
 
 	public Map<String, String> getAll();

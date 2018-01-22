@@ -70,13 +70,13 @@ public class ElasticSearchPartner implements ElasticSearchEntity, Serializable
 	@Override
 	public String getElasticSearchIndex()
 	{
-		return "partners";
+		return "partner-records";
 	}
 
 	@Override
 	public String getElasticSearchType()
 	{
-		return "partner";
+		return "partner-record";
 	}
 
 	@Override
