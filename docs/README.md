@@ -1,3 +1,7 @@
+---
+title: Resource Partner Sharing Synchronisation with Alma
+---
+
 # Partner Synchronisation with Alma
 
 
