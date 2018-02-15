@@ -1,4 +1,8 @@
+---
+title: Partner Synchronisation with Alma
+---
 # Partner Synchronisation with Alma
+{:.notoc}
 
 * TOC
 {:toc}
@@ -318,3 +322,21 @@ sample:
     "isoSymbol": "NLA:NMQU"
 }
 ```
+
+### Synchronisation
+#### Understanding the Synchronisation Process
+1. An institution makes an API call to the Sync REST service. The organisations NUC symbol is passed in the URI (in the example, '__NMQU__'). In addition, the institution passes along their ExLibris APIKEY that has read/write permissions to their Alma instance's [Resource Sharing Partners API](https://developers.exlibrisgroup.com/alma/apis/partners).
+   Example call using CURL:
+   ```
+   curl -XGET -H 'Authorization:apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' https://api.hosted.somewhere.org/v1/partner-sync/NMQU/sync```
+   
+1. The Sync service fetches all partners from Alma using the Resource Sharings Partners API.
+1. The Sync service fetches all partners from the ElasticSearch partner-records index.
+1. The Sync service fetches the configuration for the institution based on the NUC code provided from the ElasticSearch partner-configs index.
+1. For each of the partners from the datastore, the data from the configuration for the institution, based on the NUC code, and the partner record is combined to create a represetnation of the partner institution that mirrors the institution in Alma. This includes having calculated the suspension status.
+1. We compare each of the newly created representations with their counterparts from Alma:
+   - if the counterpart does not exist, we create a new Alma record and we create a new 'change' record in the partner-changes index logging the creation.
+   - if the counterpart does not match, we update the Alma record and we create a new 'change' record in the partner-changes index logging each field that was changed with both the old and the new values.
+   - if the counterpart does match, we do nothing.
+1. At the end of the process we may have Alma partners that have not been processed as there were no ElasticSearch entries for those items. These are either custom records or records that could be deleted. We refer to these as _'orphaned'_ records. The sync service does not delete any records - it only sets them as __Active__ or __Inactive__.
+
