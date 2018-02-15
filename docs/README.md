@@ -1,5 +1,4 @@
 # Partner Synchronisation with Alma
-{:.notoc}
 
 * TOC
 {:toc}
