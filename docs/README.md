@@ -16,12 +16,18 @@ This project seeks to provide a solution to enable automated loading and syncing
 
 
 ## Problem
-We require the synchronisation of data for resource partners into Alma. There are multiple sources for this data and unfortunately there is no simple interface to obtain this information. Sources of data include web pages, web applications, csv files and emails. Breaking down the data requirements into the following four categories which align to the different data sources, we get the following table:
+We require the synchronisation of data for resource partners into Alma. There are multiple sources for this data and unfortunately there is no simple interface to obtain this information. Sources of data include web pages, web applications, csv files and emails. Breaking down the data requirements into the following four categories which align to the different data sources, we get the following:
 
-|             | Addresses / Contacts                    | Suspension Status |
-| ----------- | --------------------                    | ----------------- |
-| Australia   | Web App: http://www.nla.gov.au/app/ilrs | Website: https://www.nla.gov.au/librariesaustralia/connect/find-library/ladd-members-and-suspensions |
-| New Zealand | CSV: http://natlib.govt.nz/directory-of-new-zealand-libraries.csv | Email (structured) |
+1. Australia
+   - Address and contact information:
+     Web application: http://www.nla.gov.au/app/ilrs
+   - Suspension status:
+     Website: https://www.nla.gov.au/librariesaustralia/connect/find-library/ladd-members-and-suspensions
+2. New Zealand
+   - Address and contact information:
+     CSV: http://natlib.govt.nz/directory-of-new-zealand-libraries.csv
+   - Suspension status:
+     Email (structured)
 
 Address and contact information for Australia can found at http://www.nla.gov.au/apps/ilrs. The page is a form that takes a NUC code for an institution and returns the address and contact information for that institution. This must be repeated for each Australian institution that is a part of the network. The result page then needs to be scraped.
 
