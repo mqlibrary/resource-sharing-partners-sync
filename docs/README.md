@@ -1,5 +1,8 @@
 # Partner Synchronisation with Alma
 
+<ul>
+{:toc}
+</ul>
 
 ## Introduction
 There are around 1200 institutions across Australia and New Zealand in the ILL (Inter Library Lending) partner network. To facilitate the ILL service, information regarding these partners is required. For each partner we require address and contact information and their suspension status.
@@ -14,12 +17,12 @@ This project seeks to provide a solution to enable automated loading and syncing
 ## Problem
 We require the synchronisation of data for resource partners into Alma. There are multiple sources for this data and unfortunately there is no simple interface to obtain this information. Sources of data include web pages, web applications, csv files and emails. Breaking down the data requirements into the following four categories which align to the different data sources, we get the following:
 
-1. Australia
+1. _Australia_
    - Address and contact information:
      Web application: http://www.nla.gov.au/app/ilrs
    - Suspension status:
      Website: https://www.nla.gov.au/librariesaustralia/connect/find-library/ladd-members-and-suspensions
-2. New Zealand
+2. _New Zealand_
    - Address and contact information:
      CSV: http://natlib.govt.nz/directory-of-new-zealand-libraries.csv
    - Suspension status:
@@ -58,7 +61,7 @@ This provides us with a buffer for Alma should source data systems change or cea
 ### ElasticSearch
 
 We use three indexes within ElasticSearch to manage the system. As per the new ElasticSeaerch v6 requirements, there is one type per index:-
-1. partner-records - contains the partner-record type which is a complete representation of a resource sharing partner including address/contact details and suspensions.
+1. __partner-records__ - contains the partner-record type which is a complete representation of a resource sharing partner including address/contact details and suspensions.
 ```json
 {
     "mappings": {
@@ -245,7 +248,7 @@ sample:
     ]
 }
 ```
-2. partner-changes - contains the partner-change type which represents a value change for fields in the partner record. There is a before and after describing what the value was and is respectively.
+2. __partner-changes__ - contains the partner-change type which represents a value change for fields in the partner record. There is a before and after describing what the value was and is respectively.
 ```json
 {
     "mappings": {
@@ -286,7 +289,7 @@ sample:
     "after": "+64 7 557 8695"
 }
 ```
-3. partner-configs - contains the partner-config type which has no structural definition. The data is typically key/value pairs. The partner-config stores site specific configuration values for Alma for an institution. These setting control any site specific values used when the service renders the partner. Configuration for harvesting modules are also stored in this  index.
+3. __partner-configs__ - contains the partner-config type which has no structural definition. The data is typically key/value pairs. The partner-config stores site specific configuration values for Alma for an institution. These setting control any site specific values used when the service renders the partner. Configuration for harvesting modules are also stored in this  index.
 ```
 {}
 ```
