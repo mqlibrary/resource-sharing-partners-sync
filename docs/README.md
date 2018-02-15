@@ -1,6 +1,3 @@
----
-title: Partner Synchronisation with Alma
----
 # Partner Synchronisation with Alma
 {:.notoc}
 
