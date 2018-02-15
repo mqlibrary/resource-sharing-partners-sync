@@ -1,9 +1,5 @@
 # Partner Synchronisation with Alma
 
-<ul>
-{:toc}
-</ul>
-
 ## Introduction
 There are around 1200 institutions across Australia and New Zealand in the ILL (Inter Library Lending) partner network. To facilitate the ILL service, information regarding these partners is required. For each partner we require address and contact information and their suspension status.
 
