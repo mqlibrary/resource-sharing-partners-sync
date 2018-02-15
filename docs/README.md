@@ -55,61 +55,133 @@ We use three indexes within ElasticSearch to manage the system. As per the new E
 1. partner-records - contains the partner-record type which is a complete representation of a resource sharing partner including address/contact details and suspensions.
 ```json
 {
-  "mappings": {
-    "partner-record": { 
-      "properties": {
-        "nuc": { "type": "keyword"},
-        "updated": { "type": "date", "format": "date_time_no_millis" },
-        "name": { "type": "keyword" },
-        "enabled": { "type": "boolean" },
-        "iso_ill": { "type": "boolean" },
-        "status": { "type": "keyword" },
-        "email_main": { "type": "text" },
-        "email_ill": { "type": "text" },
-        "phone_main": { "type": "text" },
-        "phone_ill": { "type": "text" },
-        "phone_fax": { "type": "text" },
-        "suspension": {
-          "properties": {
-            "suspension_added": { "type": "date", "format": "date_time_no_millis" },
-            "suspension_status": { "type": "keyword" },
-            "suspension_start": { "type": "date", "format": "date_time_no_millis" },
-            "suspension_end": { "type": "date", "format": "date_time_no_millis" },
-            "suspension_code": { "type": "keyword" },
-            "suspension_reason": { "type": "text" }
-          }
-        },
-        "addresses": {
-          "properties": {
-            "address_status": { "type": "keyword" },
-            "address_type": { "type": "keyword" },
-            "address_detail": {
-              "properties": {
-                "line1": { "type": "text" },
-                "line2": { "type": "text" },
-                "line3": { "type": "text" },
-                "line4": { "type": "text" },
-                "line5": { "type": "text" },
-                "city": { "type": "keyword" },
-                "state_province": { "type": "keyword" },
-                "postal_code": { "type": "keyword" },
-                "country": {
-                  "properties": {
-                    "value": { "type": "keyword" },
-                    "@desc": { "type": "keyword" }
-                  }
+    "mappings": {
+        "partner-record": {
+            "properties": {
+                "nuc": {
+                    "type": "keyword"
                 },
-                "address_note": { "type": "text" },
-                "start_date": { "type": "date", "format": "date_time_no_millis" },
-                "end_date": { "type": "date", "format": "date_time_no_millis" },
-                "address_types": { "type": "keyword" }
-              }
+                "updated": {
+                    "type": "date",
+                    "format": "date_time_no_millis"
+                },
+                "name": {
+                    "type": "keyword"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "iso_ill": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "keyword"
+                },
+                "email_main": {
+                    "type": "text"
+                },
+                "email_ill": {
+                    "type": "text"
+                },
+                "phone_main": {
+                    "type": "text"
+                },
+                "phone_ill": {
+                    "type": "text"
+                },
+                "phone_fax": {
+                    "type": "text"
+                },
+                "suspension": {
+                    "properties": {
+                        "suspension_added": {
+                            "type": "date",
+                            "format": "date_time_no_millis"
+                        },
+                        "suspension_status": {
+                            "type": "keyword"
+                        },
+                        "suspension_start": {
+                            "type": "date",
+                            "format": "date_time_no_millis"
+                        },
+                        "suspension_end": {
+                            "type": "date",
+                            "format": "date_time_no_millis"
+                        },
+                        "suspension_code": {
+                            "type": "keyword"
+                        },
+                        "suspension_reason": {
+                            "type": "text"
+                        }
+                    }
+                },
+                "addresses": {
+                    "properties": {
+                        "address_status": {
+                            "type": "keyword"
+                        },
+                        "address_type": {
+                            "type": "keyword"
+                        },
+                        "address_detail": {
+                            "properties": {
+                                "line1": {
+                                    "type": "text"
+                                },
+                                "line2": {
+                                    "type": "text"
+                                },
+                                "line3": {
+                                    "type": "text"
+                                },
+                                "line4": {
+                                    "type": "text"
+                                },
+                                "line5": {
+                                    "type": "text"
+                                },
+                                "city": {
+                                    "type": "keyword"
+                                },
+                                "state_province": {
+                                    "type": "keyword"
+                                },
+                                "postal_code": {
+                                    "type": "keyword"
+                                },
+                                "country": {
+                                    "properties": {
+                                        "value": {
+                                            "type": "keyword"
+                                        },
+                                        "@desc": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "address_note": {
+                                    "type": "text"
+                                },
+                                "start_date": {
+                                    "type": "date",
+                                    "format": "date_time_no_millis"
+                                },
+                                "end_date": {
+                                    "type": "date",
+                                    "format": "date_time_no_millis"
+                                },
+                                "address_types": {
+                                    "type": "keyword"
+                                }
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
 }
 ```
 sample:
@@ -170,18 +242,31 @@ sample:
 2. partner-changes - contains the partner-change type which represents a value change for fields in the partner record. There is a before and after describing what the value was and is respectively.
 ```json
 {
-  "mappings": {
-    "partner-change": { 
-      "properties": {
-        "time": { "type": "date", "format": "date_time_no_millis" },
-        "source_system": { "type": "keyword"},
-        "nuc": { "type": "keyword"},
-        "field": { "type": "keyword" },
-        "before": { "type": "text" },
-        "after": { "type": "text" }
-      }
+    "mappings": {
+        "partner-change": {
+            "properties": {
+                "time": {
+                    "type": "date",
+                    "format": "date_time_no_millis"
+                },
+                "source_system": {
+                    "type": "keyword"
+                },
+                "nuc": {
+                    "type": "keyword"
+                },
+                "field": {
+                    "type": "keyword"
+                },
+                "before": {
+                    "type": "text"
+                },
+                "after": {
+                    "type": "text"
+                }
+            }
+        }
     }
-  }
 }
 ```
 sample:
