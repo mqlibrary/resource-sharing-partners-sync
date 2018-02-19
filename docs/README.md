@@ -324,7 +324,8 @@ sample:
 1. An institution makes an API call to the Sync REST service. The organisations NUC symbol is passed in the URI (in the example, '__NMQU__'). In addition, the institution passes along their ExLibris APIKEY that has read/write permissions to their Alma instance's [Resource Sharing Partners API](https://developers.exlibrisgroup.com/alma/apis/partners).
    Example call using CURL:
    ```
-   curl -XGET -H 'Authorization:apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' https://api.hosted.somewhere.org/v1/partner-sync/NMQU/sync```
+   curl -XGET -H 'Authorization:apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' https://api.hosted.somewhere.org/v1/partner-sync/NMQU/sync
+   ```
    
 1. The Sync service fetches all partners from Alma using the Resource Sharings Partners API.
 1. The Sync service fetches all partners from the ElasticSearch partner-records index.
@@ -336,3 +337,260 @@ sample:
    - if the counterpart does match, we do nothing.
 1. At the end of the process we may have Alma partners that have not been processed as there were no ElasticSearch entries for those items. These are either custom records or records that could be deleted. We refer to these as _'orphaned'_ records. The sync service does not delete any records - it only sets them as __Active__ or __Inactive__.
 
+#### Synchronisation Record Generation
+As already stated, an Alma record is an amalgamation of the Datastore representation of an organisation and the loading institutions configuration.
+```
+DATASTORE RECORD + INSTITUTION CONFIGURATION = ALMA RECORD
+
+```
+
+__DATASTORE RECORD:__
+```json
+{
+  "partner_details": {
+    "code": "NCN",
+    "name": "Katie Zepps Nursing Library",
+    "status": "ACTIVE",
+    "profile_details": {
+      "profile_type": "ISO",
+      "iso_details": {
+        "alternative_document_delivery": false,
+        "ill_server": "nla.vdxhost.com",
+        "ill_port": 1612,
+        "iso_symbol": "NLA:NCN",
+        "request_expiry_type": {
+          "value": "INTEREST_DATE",
+          "desc": "Expire by interest date"
+        },
+        "send_requester_information": false,
+        "shared_barcodes": true,
+        "ignore_shipping_cost_override": false
+      }
+    },
+    "system_type": {
+      "value": "LADD",
+      "desc": "LADD"
+    },
+    "avg_supply_time": 4,
+    "delivery_delay": 4,
+    "currency": "AUD",
+    "borrowing_supported": true,
+    "borrowing_workflow": "LADD_Borrowing",
+    "lending_supported": true,
+    "lending_workflow": "LADD_Lending",
+    "locate_profile": {
+      "value": "LADD",
+      "desc": "LADD Locate Profile"
+    },
+    "holding_code": "NCN"
+  },
+  "contact_info": {
+    "address": [
+      {
+        "line1": "Level 6",
+        "city": "PARRAMATTA",
+        "line2": "9 Wentworth Street",
+        "line3": null,
+        "line4": null,
+        "line5": null,
+        "state_province": "NSW",
+        "postal_code": "2150",
+        "country": {
+          "value": "AUS",
+          "desc": "Australia"
+        },
+        "start_date": "2017-09-07Z",
+        "address_type": [
+          "ALL"
+        ],
+        "preferred": false
+      },
+      {
+        "line1": "PO Box 650",
+        "city": "PARRAMATTA",
+        "line2": null,
+        "line3": null,
+        "line4": null,
+        "line5": null,
+        "state_province": "NSW",
+        "postal_code": "2124",
+        "country": {
+          "value": "AUS",
+          "desc": "Australia"
+        },
+        "start_date": "2017-09-07Z",
+        "address_type": [
+          "shipping"
+        ],
+        "preferred": false
+      }
+    ],
+    "phone": [
+      {
+        "phone_number": "02 9745 7536",
+        "phone_type": [
+          "claim_phone",
+          "order_phone",
+          "payment_phone",
+          "returns_phone"
+        ],
+        "preferred": false,
+        "preferredSMS": null
+      }
+    ],
+    "email": [
+      {
+        "email_address": "library.technician@acn.edu.au",
+        "description": null,
+        "email_type": [
+          "ALL"
+        ],
+        "preferred": false
+      }
+    ]
+  },
+  "note": [],
+  "link": "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/partners/NCN"
+}
+```
+
+__+__
+
+__INSTITUTION CONFIGURATION__
+```json
+{
+  "linkBase": "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/partners/",
+  "currency": "AUD",
+  "borrowingSupported": true,
+  "borrowingWorkflow": "LADD_Borrowing",
+  "lendingSupported": true,
+  "lendingWorkflow": "LADD_Lending",
+  "avgSupplyTime": 4,
+  "deliveryDelay": 4,
+  "locateProfileDesc": "LADD Locate Profile",
+  "locateProfileValue": "LADD",
+  "systemTypeDesc": "LADD",
+  "systemTypeValue": "LADD",
+  "isoAlternativeDocumentDelivery": false,
+  "isoIllServer": "nla.vdxhost.com",
+  "isoIllPort": "1611",
+  "isoRequestExpiryTypeDesc": "Expire by interest date",
+  "isoRequestExpiryTypeValue": "INTEREST_DATE",
+  "isoSendRequesterInformation": false,
+  "isoSharedBarcodes": true,
+  "isoSymbol": "NLA:NMQU"
+}
+```
+
+__=__
+
+
+__ALMA RECORD__
+```json
+{
+  "partner_details": {
+    "code": "NCN",
+    "name": "Katie Zepps Nursing Library",
+    "status": "ACTIVE",
+    "profile_details": {
+      "profile_type": "ISO",
+      "iso_details": {
+        "alternative_document_delivery": false,
+        "ill_server": "nla.vdxhost.com",
+        "ill_port": 1612,
+        "iso_symbol": "NLA:NCN",
+        "request_expiry_type": {
+          "value": "INTEREST_DATE",
+          "desc": "Expire by interest date"
+        },
+        "send_requester_information": false,
+        "shared_barcodes": true,
+        "ignore_shipping_cost_override": false
+      }
+    },
+    "system_type": {
+      "value": "LADD",
+      "desc": "LADD"
+    },
+    "avg_supply_time": 4,
+    "delivery_delay": 4,
+    "currency": "AUD",
+    "borrowing_supported": true,
+    "borrowing_workflow": "LADD_Borrowing",
+    "lending_supported": true,
+    "lending_workflow": "LADD_Lending",
+    "locate_profile": {
+      "value": "LADD",
+      "desc": "LADD Locate Profile"
+    },
+    "holding_code": "NCN"
+  },
+  "contact_info": {
+    "address": [
+      {
+        "line1": "Level 6",
+        "city": "PARRAMATTA",
+        "line2": "9 Wentworth Street",
+        "line3": null,
+        "line4": null,
+        "line5": null,
+        "state_province": "NSW",
+        "postal_code": "2150",
+        "country": {
+          "value": "AUS",
+          "desc": "Australia"
+        },
+        "start_date": "2017-09-07Z",
+        "address_type": [
+          "ALL"
+        ],
+        "preferred": false
+      },
+      {
+        "line1": "PO Box 650",
+        "city": "PARRAMATTA",
+        "line2": null,
+        "line3": null,
+        "line4": null,
+        "line5": null,
+        "state_province": "NSW",
+        "postal_code": "2124",
+        "country": {
+          "value": "AUS",
+          "desc": "Australia"
+        },
+        "start_date": "2017-09-07Z",
+        "address_type": [
+          "shipping"
+        ],
+        "preferred": false
+      }
+    ],
+    "phone": [
+      {
+        "phone_number": "02 9745 7536",
+        "phone_type": [
+          "claim_phone",
+          "order_phone",
+          "payment_phone",
+          "returns_phone"
+        ],
+        "preferred": false,
+        "preferredSMS": null
+      }
+    ],
+    "email": [
+      {
+        "email_address": "library.technician@acn.edu.au",
+        "description": null,
+        "email_type": [
+          "ALL"
+        ],
+        "preferred": false
+      }
+    ]
+  },
+  "note": [],
+  "link": "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/partners/NCN"
+}
+```
