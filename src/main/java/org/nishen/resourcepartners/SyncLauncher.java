@@ -16,6 +16,7 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.glassfish.jersey.servlet.ServletProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,12 @@ public class SyncLauncher
 		// Initialize and register Jersey ServletContainer
 		ServletRegistration servletRegistration = context.addServlet("ServletContainer", ServletContainer.class);
 		servletRegistration.addMapping("/*");
-		servletRegistration.setInitParameter("javax.ws.rs.Application", "org.nishen.resourcepartners.SyncApp");
+		servletRegistration.setInitParameter(ServletProperties.JAXRS_APPLICATION_CLASS,
+		                                     "org.nishen.resourcepartners.SyncApp");
+		servletRegistration.setInitParameter("jersey.config.server.provider.classnames",
+		                                     "io.swagger.jaxrs.listing.ApiListingResource" +
+		                                                                                 ",io.swagger.jaxrs.listing.SwaggerSerializers" +
+		                                                                                 ",org.nishen.resourcepartners.resources.Synchronizer");
 
 		// Initialize and register GuiceFilter
 		final FilterRegistration registration = context.addFilter("GuiceFilter", GuiceFilter.class);

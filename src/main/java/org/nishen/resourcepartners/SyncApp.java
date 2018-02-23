@@ -21,7 +21,9 @@ public class SyncApp extends ResourceConfig
 	@Inject
 	public SyncApp(ServiceLocator locator)
 	{
-		packages("org.nishen.resourcepartners");
+		String resources = "org.nishen.resourcepartners.resources";
+
+		packages(resources);
 
 		register(io.swagger.jaxrs.listing.ApiListingResource.class);
 		register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
@@ -36,9 +38,10 @@ public class SyncApp extends ResourceConfig
 
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setVersion("0.0.8");
-		beanConfig.setSchemes(new String[] { "http", "https" });
+		beanConfig.setSchemes(new String[] { "http" });
+		beanConfig.setHost("localhost:2020");
 		beanConfig.setBasePath("/partner-sync");
-		beanConfig.setResourcePackage("org.nishen.resourcepartners.resources");
+		beanConfig.setResourcePackage(resources);
 		beanConfig.setPrettyPrint(true);
 		beanConfig.setScan(true);
 
