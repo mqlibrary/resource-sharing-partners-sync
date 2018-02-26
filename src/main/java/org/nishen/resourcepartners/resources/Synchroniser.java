@@ -28,9 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
-@Api
 @Path("{nuc}")
+@Produces(MediaType.APPLICATION_JSON)
+@Api
 public class Synchroniser
 {
 	private static final Logger log = LoggerFactory.getLogger(Synchroniser.class);
@@ -48,9 +52,14 @@ public class Synchroniser
 		this.syncProcessorFactory = syncProcessorFactory;
 	}
 
-	@Path("test")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("test")
+	@ApiOperation(value = "test service", notes = "make a test call to ensure service is functioning")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response test(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[test] nuc: {}, authorization: {}", nuc, authorization);
@@ -59,9 +68,15 @@ public class Synchroniser
 		               .build();
 	}
 
-	@Path("sync")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("sync")
+	@ApiOperation(value = "synchronise Alma institution resource sharing partners with datasource",
+	              response = Partners.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response sync(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[sync] nuc: {}, key: {}", nuc, authorization);
@@ -90,9 +105,15 @@ public class Synchroniser
 		return Response.ok(partners).build();
 	}
 
-	@Path("preview")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("preview")
+	@ApiOperation(value = "preview of records that will be changed when sync is called. Does not change any data",
+	              response = Partners.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response preview(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[preview] nuc: {}, key: {}", nuc, authorization);
@@ -121,9 +142,15 @@ public class Synchroniser
 		return Response.ok(partners).build();
 	}
 
-	@Path("changes")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("changes")
+	@ApiOperation(value = "view all fields that will be changed on sync", response = ElasticSearchChangeRecord.class,
+	              responseContainer = "List")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response changes(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[changes] nuc: {}, key: {}", nuc, authorization);
@@ -155,9 +182,14 @@ public class Synchroniser
 		}
 	}
 
-	@Path("orphaned")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("orphaned")
+	@ApiOperation(value = "view records in Alma with no equivalent in the datasource", response = Partners.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response orphaned(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[orphaned] nuc: {}, key: {}", nuc, authorization);
@@ -186,9 +218,14 @@ public class Synchroniser
 		return Response.ok(partners).build();
 	}
 
-	@Path("expirecache")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("expirecache")
+	@ApiOperation(value = "clear the cache")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "nuc", value = "Organisations NUC (National Union Code) symbol",
+	                                       required = true, dataType = "string", paramType = "path"),
+	                     @ApiImplicitParam(name = "Authorization",
+	                                       value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'", dataType = "string",
+	                                       paramType = "header") })
 	public Response expireCache(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[expireCache] nuc: {}, key: {}", nuc, authorization);
