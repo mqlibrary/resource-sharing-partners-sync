@@ -13,7 +13,7 @@ __Build Command:__
 mvn -DskipTests -P prd clean package
 ```
 
-This should create a package under the target/ folder: __resource-sharing-partners-sync-x.x.x-dist.(zip|tar.gz)__
+This should create a package under the target/ folder: __```resource-sharing-partners-sync-x.x.x-dist.(zip|tar.gz)```__
 
 Unzip/untar the appropriate package to desired location. Edit the file ```resource-sharing-partners-sync.sh``` and replace the variables with their appropriate values.
 
