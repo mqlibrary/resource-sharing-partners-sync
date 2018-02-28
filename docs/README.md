@@ -3,6 +3,42 @@
 * TOC
 {:toc}
 
+## Build
+__Requirements:__
+1. Java 8
+1. Maven
+
+__Build Command:__
+```
+mvn -DskipTests -P prd clean package
+```
+
+This should create a package under the target/ folder: __resource-sharing-partners-sync-x.x.x-dist.(zip|tar.gz)__
+
+Unzip/untar the appropriate package to desired location. Edit the file ```resource-sharing-partners-sync.sh``` and replace the variables with their appropriate values.
+
+```
+#!/bin/bash
+
+APP=${project.artifactId}-${project.version}.jar
+
+export ALMA_URL=${alma.url}
+export ELASTIC_URL=${elastic.url}
+export ELASTIC_USR=${elastic.usr}
+export ELASTIC_PWD=${elastic.pwd}
+export SYNC_HOST=${sync.host}
+export SYNC_PORT=${sync.port}
+export SYNC_PATH=${sync.path}
+
+JAVA_OPTS="-Xms1g -Xmx1g"
+
+java $JAVA_OPTS -jar $APP $*
+```
+
+Execute the file to start the server.
+
+Obtain the Swagger file from: ```http://${sync.host}:${sync.port}/${sync.path}/swagger.json```
+
 
 ## Introduction
 There are around 1200 institutions across Australia and New Zealand in the ILL (Inter Library Lending) partner network. To facilitate the ILL service, information regarding these partners is required. For each partner we require address and contact information and their suspension status.
