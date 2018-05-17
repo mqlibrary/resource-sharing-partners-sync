@@ -2,6 +2,7 @@ package org.nishen.resourcepartners.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -42,12 +43,14 @@ public class Synchroniser
 
 	private SyncProcessorFactory syncProcessorFactory;
 
-	private Cache<SyncPayload> cache;
+	private Cache<ConcurrentMap<String, Partner>> cachePartner;
 
 	@Inject
-	public Synchroniser(Provider<Cache<SyncPayload>> cacheProvider, SyncProcessorFactory syncProcessorFactory)
+	public Synchroniser(Provider<Cache<ConcurrentMap<String, Partner>>> cachePartnerProvider,
+	                    SyncProcessorFactory syncProcessorFactory)
 	{
-		cache = cacheProvider.get();
+		this.cachePartner = cachePartnerProvider.get();
+
 		this.syncProcessorFactory = syncProcessorFactory;
 	}
 
@@ -223,7 +226,7 @@ public class Synchroniser
 	{
 		log.debug("[expireCache] nuc: {}, key: {}", nuc, authorization);
 
-		cache.expire(authorization);
+		cachePartner.expire(authorization);
 
 		return Response.ok().build();
 	}
