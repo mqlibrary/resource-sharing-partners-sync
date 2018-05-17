@@ -6,7 +6,7 @@
 	<groupId>org.nishen</groupId>
 	<artifactId>resource-sharing-partners-sync</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1.2</version>
+	<version>0.1.3</version>
 
 	<name>resource-sharing-partners-sync</name>
 
@@ -121,9 +121,30 @@
 			<version>1.2.3</version>
 		</dependency>
 		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.10</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.code.findbugs</groupId>
+					<artifactId>annotations</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-jersey2-jaxrs</artifactId>
 			<version>1.5.18</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.reflections</groupId>
+					<artifactId>reflections</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>
