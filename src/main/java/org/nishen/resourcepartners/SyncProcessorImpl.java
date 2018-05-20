@@ -480,7 +480,7 @@ public class SyncProcessorImpl implements SyncProcessor
 		return a.equals(b);
 	}
 
-	private Partner makePartner(ElasticSearchPartner e)
+	public Partner makePartner(ElasticSearchPartner e)
 	{
 		Partner p = of.createPartner();
 
