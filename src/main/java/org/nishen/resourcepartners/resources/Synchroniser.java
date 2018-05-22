@@ -81,6 +81,9 @@ public class Synchroniser
 	{
 		log.debug("[sync] nuc: {}, key: {}", nuc, authorization);
 
+		if (authorization == null)
+			return Response.status(400, "No API key provided").build();
+
 		Partners partners = of.createPartners();
 
 		try
@@ -117,6 +120,9 @@ public class Synchroniser
 	{
 		log.debug("[preview] nuc: {}, key: {}", nuc, authorization);
 
+		if (authorization == null)
+			return Response.status(400, "No API key provided").build();
+
 		Partners partners = of.createPartners();
 
 		try
@@ -152,6 +158,9 @@ public class Synchroniser
 	                         required = true) @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[changes] nuc: {}, key: {}", nuc, authorization);
+
+		if (authorization == null)
+			return Response.status(400, "No API key provided").build();
 
 		List<ElasticSearchChangeRecord> changes = new ArrayList<ElasticSearchChangeRecord>();
 
@@ -191,6 +200,9 @@ public class Synchroniser
 	{
 		log.debug("[orphaned] nuc: {}, key: {}", nuc, authorization);
 
+		if (authorization == null)
+			return Response.status(400, "No API key provided").build();
+
 		Partners partners = of.createPartners();
 
 		try
@@ -225,6 +237,9 @@ public class Synchroniser
 	                             required = true) @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[expireCache] nuc: {}, key: {}", nuc, authorization);
+
+		if (authorization == null)
+			return Response.status(400, "No API key provided").build();
 
 		cachePartner.expire(authorization);
 
