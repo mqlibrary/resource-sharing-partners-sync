@@ -104,17 +104,22 @@ public class SyncProcessorImpl implements SyncProcessor
 			log.debug("processing org: {}", s);
 
 			Partner a = makePartner(elasticPartners.get(s));
-			log.debug("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
+			log.debug("elasticPartner[{}]: {}", s, JaxbUtilModel.formatPretty(a));
 
 			Partner b = almaPartners.get(s);
-			log.debug("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
-
-			// we keep notes from Alma - source of truth for notes.
 			if (b != null)
+			{
+				// we keep notes from Alma - source of truth for notes.
 				a.setNotes(b.getNotes());
+				log.debug("almaPartner[{}]: {}", s, JaxbUtilModel.formatPretty(b));
+			}
+			else
+			{
+				log.debug("almaPartner[{}]: {}", s, "new Partner");
+			}
 
 			List<ElasticSearchChangeRecord> changes = comparePartners(a, b);
-			log.trace("comparing partners [{}], changecount: {}", s, changes.size());
+			log.debug("comparing partners [{}], changecount: {}", s, changes.size());
 
 			if (changes.size() > 0)
 			{
@@ -505,15 +510,16 @@ public class SyncProcessorImpl implements SyncProcessor
 		RequestExpiryType requestExpiryType = of.createRequestExpiryType();
 		requestExpiryType.setValue(config.get("isoRequestExpiryTypeValue").orElse("INTEREST_DATE"));
 		requestExpiryType.setDesc(config.get("isoRequestExpiryTypeDesc").orElse("Expire by interest date"));
-		
+
 		IsoDetails isoDetails = of.createIsoDetails();
 		profileDetails.setIsoDetails(isoDetails);
 
 		isoDetails.setAlternativeDocumentDelivery(false);
 		isoDetails.setIllServer(config.get("isoIllServer").orElse("nla.vdxhost.com"));
-		isoDetails.setIllPort(Integer.parseInt(config.get("isoIllPort").orElse("1611")));		
+		isoDetails.setIllPort(Integer.parseInt(config.get("isoIllPort").orElse("1611")));
 		isoDetails.setIsoSymbol(!e.getNuc().startsWith("NLNZ") ? "NLA:" + e.getNuc() : e.getNuc());
-		isoDetails.setSendRequesterInformation(Boolean.valueOf(config.get("isoSendRequesterInformation").orElse("false")));
+		isoDetails.setSendRequesterInformation(Boolean.valueOf(config.get("isoSendRequesterInformation")
+		                                                             .orElse("false")));
 		isoDetails.setSharedBarcodes(Boolean.valueOf(config.get("isoSharedBarcodes").orElse("true")));
 		isoDetails.setRequestExpiryType(requestExpiryType);
 
