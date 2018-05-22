@@ -104,7 +104,7 @@ public class SyncProcessorImpl implements SyncProcessor
 			log.debug("processing org: {}", s);
 
 			Partner a = makePartner(elasticPartners.get(s));
-			log.trace("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
+			log.debug("elasticPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(a));
 
 			Partner b = almaPartners.get(s);
 			log.debug("almaPartner[{}]: {}", nuc, JaxbUtilModel.formatPretty(b));
@@ -503,36 +503,36 @@ public class SyncProcessorImpl implements SyncProcessor
 		profileDetails.setProfileType(ProfileType.ISO);
 
 		RequestExpiryType requestExpiryType = of.createRequestExpiryType();
-		requestExpiryType.setValue("INTEREST_DATE");
-		requestExpiryType.setDesc("Expire by interest date");
-
+		requestExpiryType.setValue(config.get("isoRequestExpiryTypeValue").orElse("INTEREST_DATE"));
+		requestExpiryType.setDesc(config.get("isoRequestExpiryTypeDesc").orElse("Expire by interest date"));
+		
 		IsoDetails isoDetails = of.createIsoDetails();
 		profileDetails.setIsoDetails(isoDetails);
 
 		isoDetails.setAlternativeDocumentDelivery(false);
-		isoDetails.setIllServer(config.get("isoIllServer").get());
-		isoDetails.setIllPort(Integer.parseInt(config.get("isoIllPort").get()));
+		isoDetails.setIllServer(config.get("isoIllServer").orElse("nla.vdxhost.com"));
+		isoDetails.setIllPort(Integer.parseInt(config.get("isoIllPort").orElse("1611")));		
 		isoDetails.setIsoSymbol(!e.getNuc().startsWith("NLNZ") ? "NLA:" + e.getNuc() : e.getNuc());
-		isoDetails.setSendRequesterInformation(false);
-		isoDetails.setSharedBarcodes(true);
+		isoDetails.setSendRequesterInformation(Boolean.valueOf(config.get("isoSendRequesterInformation").orElse("false")));
+		isoDetails.setSharedBarcodes(Boolean.valueOf(config.get("isoSharedBarcodes").orElse("true")));
 		isoDetails.setRequestExpiryType(requestExpiryType);
 
 		SystemType systemType = of.createPartnerDetailsSystemType();
-		systemType.setValue("LADD");
-		systemType.setDesc("LADD");
+		systemType.setValue(config.get("systemTypeValue").orElse("LADD"));
+		systemType.setDesc(config.get("systemTypeDesc").orElse("LADD"));
 
 		LocateProfile locateProfile = of.createPartnerDetailsLocateProfile();
-		locateProfile.setValue("LADD");
-		locateProfile.setDesc("LADD Locate Profile");
+		locateProfile.setValue(config.get("locateProfileValue").orElse("LADD"));
+		locateProfile.setDesc(config.get("locateProfileDesc").orElse("LADD Locate Profile"));
 
 		partnerDetails.setSystemType(systemType);
-		partnerDetails.setAvgSupplyTime(4);
-		partnerDetails.setDeliveryDelay(4);
-		partnerDetails.setCurrency("AUD");
-		partnerDetails.setBorrowingSupported(true);
-		partnerDetails.setBorrowingWorkflow("LADD_Borrowing");
-		partnerDetails.setLendingSupported(true);
-		partnerDetails.setLendingWorkflow("LADD_Lending");
+		partnerDetails.setAvgSupplyTime(Integer.parseInt(config.get("avgSupplyTime").orElse("4")));
+		partnerDetails.setDeliveryDelay(Integer.parseInt(config.get("deliveryDelay").orElse("4")));
+		partnerDetails.setCurrency(config.get("currency").orElse("AUD"));
+		partnerDetails.setBorrowingSupported(Boolean.parseBoolean(config.get("borrowingSupported").orElse("true")));
+		partnerDetails.setBorrowingWorkflow(config.get("borrowingWorkflow").orElse("LADD_Borrowing"));
+		partnerDetails.setLendingSupported(Boolean.parseBoolean(config.get("lendingSupported").orElse("true")));
+		partnerDetails.setLendingWorkflow(config.get("lendingWorkflow").orElse("LADD_Lending"));
 		partnerDetails.setLocateProfile(locateProfile);
 		partnerDetails.setHoldingCode(e.getNuc());
 
