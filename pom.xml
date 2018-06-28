@@ -12,6 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<docker.registry>registry.svc.library.local</docker.registry>
 		<jersey.version>2.26</jersey.version>
 		<log.base>/Data/resource-partners/logs</log.base>
 		<log.level>DEBUG</log.level>
@@ -204,8 +205,10 @@
 				<version>3.1.0</version>
 				<executions>
 					<execution>
-						<id>jar-with-dependencies</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- bind to the packaging phase -->
+						<id>jar-with-dependencies</id>
+						<!-- this is used for inheritance merges -->
+						<phase>package</phase>
+						<!-- bind to the packaging phase -->
 						<goals>
 							<goal>single</goal>
 						</goals>
@@ -296,6 +299,22 @@
 				</executions>
 				<configuration>
 					<mainClass>org.nishen.resourcepartners.SyncLauncher</mainClass>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.26.0</version>
+				<configuration>
+					<images>
+						<image>
+							<name>${docker.registry}/${project.artifactId}:${project.version}</name>
+							<alias>${project.artifactId}</alias>
+							<build>
+								<dockerFileDir>${project.basedir}</dockerFileDir>
+							</build>
+						</image>
+					</images>
 				</configuration>
 			</plugin>
 		</plugins>
