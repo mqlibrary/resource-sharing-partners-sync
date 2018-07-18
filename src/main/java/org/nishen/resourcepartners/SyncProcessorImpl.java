@@ -91,7 +91,7 @@ public class SyncProcessorImpl implements SyncProcessor
 		Map<String, Partner> deleted = new HashMap<String, Partner>();
 		Map<String, List<ElasticSearchChangeRecord>> allChanges =
 		        new HashMap<String, List<ElasticSearchChangeRecord>>();
-		
+
 		long allChangesCount = 0;
 
 		List<String> remaining = new ArrayList<String>(almaPartners.keySet());
@@ -551,7 +551,6 @@ public class SyncProcessorImpl implements SyncProcessor
 		Addresses addresses = of.createAddresses();
 		contactInfo.setAddresses(addresses);
 
-		String preferredAddressType = config.get("preferredAddressType").orElse("").toLowerCase();
 		for (ElasticSearchPartnerAddress a : e.getAddresses())
 		{
 			if (!"active".equals(a.getAddressStatus()))
@@ -564,23 +563,13 @@ public class SyncProcessorImpl implements SyncProcessor
 
 			String addressType = a.getAddressType();
 			if ("billing".equals(addressType))
-			{
 				addressType = "billing";
-				if (addressType.equals(preferredAddressType))
-					a.getAddressDetail().setPreferred(true);
-			}
 			else if ("postal".equals(addressType))
-			{
 				addressType = "shipping";
-				if (addressType.equals(preferredAddressType))
-					a.getAddressDetail().setPreferred(true);
-			}
+			else if ("main".equals(addressType))
+				addressType = "main";
 			else
-			{
 				addressType = "ALL";
-				if (addressType.equals(preferredAddressType))
-					a.getAddressDetail().setPreferred(true);
-			}
 
 			AddressTypes addressTypes = of.createAddressAddressTypes();
 			addressTypes.getAddressType().add(addressType);
@@ -591,22 +580,47 @@ public class SyncProcessorImpl implements SyncProcessor
 			addresses.getAddress().add(a.getAddressDetail());
 		}
 
+		// set preferred
+		String preferredAddressType = config.get("preferredAddressType").orElse("").toLowerCase();
+		boolean preferredAddressTypeSet = false;
+		for (Address address : addresses.getAddress())
+			if (!preferredAddressTypeSet && address.getAddressTypes().getAddressType().contains(preferredAddressType))
+			{
+				address.setPreferred(true);
+				preferredAddressTypeSet = true;
+			}
+
+		if (!preferredAddressTypeSet)
+			for (Address address : addresses.getAddress())
+				if (address.getAddressTypes().getAddressType().contains("ALL"))
+				{
+					address.setPreferred(true);
+					break;
+				}
+
 		Phones phones = of.createPhones();
 		contactInfo.setPhones(phones);
 
 		String preferredPhoneType = config.get("preferredPhoneType").orElse("");
+		boolean preferredPhoneTypeSet = false;
 
-		if (e.getPhoneMain() != null && !"".equals(e.getPhoneMain()))
+		if (e.getPhoneIll() != null && !"".equals(e.getPhoneIll()))
 		{
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
-			phoneTypes.getPhoneType().add("ALL");
+			phoneTypes.getPhoneType().add("order_phone");
+			phoneTypes.getPhoneType().add("claim_phone");
+			phoneTypes.getPhoneType().add("payment_phone");
+			phoneTypes.getPhoneType().add("returns_phone");
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
-			phone.setPhoneNumber(e.getPhoneMain());
+			phone.setPhoneNumber(e.getPhoneIll());
 			phone.setPreferred(false);
-			if (phoneTypes.getPhoneType().contains(preferredPhoneType))
+			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
+			{
 				phone.setPreferred(true);
+				preferredPhoneTypeSet = true;
+			}
 
 			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
@@ -625,28 +639,31 @@ public class SyncProcessorImpl implements SyncProcessor
 			phone.setPhoneTypes(phoneTypes);
 			phone.setPhoneNumber(e.getPhoneFax());
 			phone.setPreferred(false);
-			if (phoneTypes.getPhoneType().contains(preferredPhoneType))
+			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
+			{
 				phone.setPreferred(true);
+				preferredPhoneTypeSet = true;
+			}
 
 			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
 			phones.getPhone().add(phone);
 		}
 
-		if (e.getPhoneIll() != null && !"".equals(e.getPhoneIll()))
+		if (e.getPhoneMain() != null && !"".equals(e.getPhoneMain()))
 		{
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
-			phoneTypes.getPhoneType().add("order_phone");
-			phoneTypes.getPhoneType().add("claim_phone");
-			phoneTypes.getPhoneType().add("payment_phone");
-			phoneTypes.getPhoneType().add("returns_phone");
+			phoneTypes.getPhoneType().add("ALL");
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
-			phone.setPhoneNumber(e.getPhoneIll());
+			phone.setPhoneNumber(e.getPhoneMain());
 			phone.setPreferred(false);
-			if (phoneTypes.getPhoneType().contains(preferredPhoneType))
+			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
+			{
 				phone.setPreferred(true);
+				preferredPhoneTypeSet = true;
+			}
 
 			Collections.sort(phone.getPhoneTypes().getPhoneType());
 
@@ -657,23 +674,7 @@ public class SyncProcessorImpl implements SyncProcessor
 		contactInfo.setEmails(emails);
 
 		String preferredEmailType = config.get("preferredEmailType").orElse("");
-
-		if (e.getEmailMain() != null && !"".equals(e.getEmailMain()))
-		{
-			EmailTypes emailTypes = of.createEmailEmailTypes();
-			emailTypes.getEmailType().add("main");
-
-			Email email = of.createEmail();
-			email.setEmailTypes(emailTypes);
-			email.setEmailAddress(e.getEmailMain());
-			email.setPreferred(false);
-			if (emailTypes.getEmailType().contains(preferredEmailType))
-				email.setPreferred(true);
-
-			Collections.sort(email.getEmailTypes().getEmailType());
-
-			emails.getEmail().add(email);
-		}
+		boolean preferredEmailTypeSet = false;
 
 		if (e.getEmailIll() != null && !"".equals(e.getEmailIll()))
 		{
@@ -684,8 +685,32 @@ public class SyncProcessorImpl implements SyncProcessor
 			email.setEmailTypes(emailTypes);
 			email.setEmailAddress(e.getEmailIll());
 			email.setPreferred(false);
-			if (emailTypes.getEmailType().contains(preferredEmailType))
+			if (!preferredEmailTypeSet && emailTypes.getEmailType().contains(preferredEmailType))
+			{
 				email.setPreferred(true);
+				preferredEmailTypeSet = true;
+			}
+
+			Collections.sort(email.getEmailTypes().getEmailType());
+
+			emails.getEmail().add(email);
+		}
+
+		if (e.getEmailMain() != null && !"".equals(e.getEmailMain()))
+		{
+			EmailTypes emailTypes = of.createEmailEmailTypes();
+			emailTypes.getEmailType().add("main");
+
+			Email email = of.createEmail();
+			email.setEmailTypes(emailTypes);
+			email.setEmailAddress(e.getEmailMain());
+			email.setPreferred(false);
+			if (!preferredEmailTypeSet &&
+			    (emailTypes.getEmailType().contains(preferredEmailType) || "ALL".equalsIgnoreCase(preferredEmailType)))
+			{
+				email.setPreferred(true);
+				preferredEmailTypeSet = true;
+			}
 
 			Collections.sort(email.getEmailTypes().getEmailType());
 
