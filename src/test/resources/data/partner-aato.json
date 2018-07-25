@@ -1,0 +1,45 @@
+{
+    "addresses": [
+        {
+            "address_detail": {
+                "city": "Canberra",
+                "country": {
+                    "@desc": "Australia",
+                    "value": "AUS"
+                },
+                "line1": "ATO Library & Information Services",
+                "line2": "26 Narellan St",
+                "postal_code": "2600",
+                "state_province": "ACT"
+            },
+            "address_status": "active",
+            "address_type": "main"
+        },
+        {
+            "address_detail": {
+                "line1": "Same as Main address"
+            },
+            "address_status": "active",
+            "address_type": "postal"
+        },
+        {
+            "address_detail": {
+                "line1": "Same as Postal address"
+            },
+            "address_status": "active",
+            "address_type": "billing"
+        }
+    ],
+    "email_ill": "library-NAT@ato.gov.au",
+    "email_main": null,
+    "enabled": true,
+    "iso_ill": false,
+    "name": "Australian Taxation Office",
+    "nuc": "AATO",
+    "phone_fax": null,
+    "phone_ill": "(02) 62161500",
+    "phone_main": null,
+    "status": "not suspended",
+    "suspensions": [],
+    "updated": "2018-01-22T13:05:07+1100"
+}

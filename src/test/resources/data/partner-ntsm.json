@@ -1,0 +1,46 @@
+{
+	"addresses": [
+		{
+			"address_detail": {
+				"city": "ULTIMO",
+				"country": {
+					"@desc": "Australia",
+					"value": "AUS"
+				},
+				"line1": "Blake Library [City Campus]",
+				"line2": "Cnr Quay St & Ultimo Rd",
+				"postal_code": "2007",
+				"state_province": "NSW"
+			},
+			"address_status": "active",
+			"address_type": "main"
+		},
+		{
+			"address_detail": {
+				"city": "BROADWAY",
+				"country": {
+					"@desc": "Australia",
+					"value": "AUS"
+				},
+				"line1": "Blake Library [City Campus]",
+				"line2": "PO Box 123",
+				"postal_code": "2007",
+				"state_province": "NSW"
+			},
+			"address_status": "active",
+			"address_type": "postal"
+		}
+	],
+	"email_ill": "lib-as-ill@uts.edu.au",
+	"email_main": null,
+	"enabled": true,
+	"iso_ill": true,
+	"name": "University of Technology, Sydney",
+	"nuc": "NTSM",
+	"phone_fax": null,
+	"phone_ill": "02 9514 3314",
+	"phone_main": null,
+	"status": "not suspended",
+	"suspensions": [],
+	"updated": "2018-01-22T13:05:07+1100"
+}                                                                                                                    
