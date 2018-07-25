@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.nishen.resourcepartners.dao.AlmaDAO;
 import org.nishen.resourcepartners.dao.AlmaDAOFactory;
@@ -18,7 +20,6 @@ import org.nishen.resourcepartners.entity.ElasticSearchPartnerAddress;
 import org.nishen.resourcepartners.entity.ElasticSearchSuspension;
 import org.nishen.resourcepartners.entity.SyncPayload;
 import org.nishen.resourcepartners.model.Address;
-import org.nishen.resourcepartners.model.Address.AddressTypes;
 import org.nishen.resourcepartners.model.Addresses;
 import org.nishen.resourcepartners.model.ContactInfo;
 import org.nishen.resourcepartners.model.Email;
@@ -39,6 +40,7 @@ import org.nishen.resourcepartners.model.RequestExpiryType;
 import org.nishen.resourcepartners.model.Status;
 import org.nishen.resourcepartners.util.JaxbUtil;
 import org.nishen.resourcepartners.util.JaxbUtilModel;
+import org.nishen.resourcepartners.util.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,8 @@ import com.google.inject.assistedinject.Assisted;
 public class SyncProcessorImpl implements SyncProcessor
 {
 	private static final Logger log = LoggerFactory.getLogger(SyncProcessorImpl.class);
+
+	private static final String REGEX_SAMEAS = "same as (.*) address";
 
 	private static final String DEFAULT_LINK_BASE = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/partners/";
 
@@ -60,6 +64,8 @@ public class SyncProcessorImpl implements SyncProcessor
 	private String nuc;
 
 	private ObjectFactory of = new ObjectFactory();
+
+	private Pattern patternSameAs = Pattern.compile(REGEX_SAMEAS, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	@Inject
 	public SyncProcessorImpl(ElasticSearchDAO elastic, AlmaDAOFactory almaFactory, ConfigFactory configFactory,
@@ -164,7 +170,8 @@ public class SyncProcessorImpl implements SyncProcessor
 		return Optional.of(new SyncPayload(changed, deleted, allChanges));
 	}
 
-	private List<ElasticSearchChangeRecord> comparePartners(Partner a, Partner b)
+	@Override
+	public List<ElasticSearchChangeRecord> comparePartners(Partner a, Partner b)
 	{
 		assert (a != null);
 
@@ -488,7 +495,8 @@ public class SyncProcessorImpl implements SyncProcessor
 		return a.equals(b);
 	}
 
-	private Partner makePartner(ElasticSearchPartner e)
+	@Override
+	public Partner makePartner(ElasticSearchPartner e)
 	{
 		Partner p = of.createPartner();
 
@@ -548,8 +556,12 @@ public class SyncProcessorImpl implements SyncProcessor
 		ContactInfo contactInfo = of.createContactInfo();
 		p.setContactInfo(contactInfo);
 
+		// AddressTypes: billing, claim, order, payment, returns, shipping, ALL
 		Addresses addresses = of.createAddresses();
 		contactInfo.setAddresses(addresses);
+
+		Map<String, Address> addressMap = new HashMap<String, Address>();
+		Map<String, String> addressTypeMap = new HashMap<String, String>();
 
 		for (ElasticSearchPartnerAddress a : e.getAddresses())
 		{
@@ -559,25 +571,84 @@ public class SyncProcessorImpl implements SyncProcessor
 			if (!isValidAddress(a.getAddressDetail()))
 				continue;
 
-			a.getAddressDetail().setPreferred(false);
-
 			String addressType = a.getAddressType();
-			if ("billing".equals(addressType))
-				addressType = "billing";
-			else if ("postal".equals(addressType))
-				addressType = "shipping";
-			else if ("main".equals(addressType))
-				addressType = "main";
-			else
-				addressType = "ALL";
+			if (addressType == null)
+				continue;
 
-			AddressTypes addressTypes = of.createAddressAddressTypes();
-			addressTypes.getAddressType().add(addressType);
+			String addressSameAs = addressSameAs(a.getAddressDetail()).orElse(addressType);
+			addressTypeMap.put(addressType.toLowerCase(), addressSameAs.toLowerCase());
+			if (addressType.equals(addressSameAs))
+			{
+				a.getAddressDetail().setPreferred(false);
+				a.getAddressDetail().setAddressTypes(of.createAddressAddressTypes());
+				addressMap.put(addressType.toLowerCase(), ObjectUtil.deepClone(a.getAddressDetail()));
+			}
+		}
 
-			a.getAddressDetail().setAddressTypes(addressTypes);
-			Collections.sort(a.getAddressDetail().getAddressTypes().getAddressType());
+		List<String> addressTypes = new ArrayList<String>();
+		addressTypes.add("claim");
+		addressTypes.add("order");
+		addressTypes.add("returns");
+		addressTypes.add("shipping");
+		addressTypes.add("billing");
+		addressTypes.add("payment");
 
-			addresses.getAddress().add(a.getAddressDetail());
+		List<String> addressesList = new ArrayList<String>();
+		if (addressTypeMap.keySet().contains("billing"))
+			addressesList.add("billing");
+
+		if (addressTypeMap.keySet().contains("postal"))
+			addressesList.add("postal");
+
+		if (addressTypeMap.keySet().contains("main"))
+			addressesList.add("main");
+
+		for (int x = 0; x < addressesList.size(); x++)
+		{
+			String addressType = addressesList.get(x);
+
+			Address a = resolveAddress(addressTypeMap, addressMap, addressType);
+
+			if (a != null)
+			{
+				switch (addressType)
+				{
+					case "billing":
+						if (addressTypes.remove("billing"))
+							a.getAddressTypes().getAddressType().add("billing");
+
+						if (addressTypes.remove("payment"))
+							a.getAddressTypes().getAddressType().add("payment");
+
+						break;
+
+					case "postal":
+						if (addressTypes.remove("shipping"))
+							a.getAddressTypes().getAddressType().add("shipping");
+
+						if (addressTypes.remove("returns"))
+							a.getAddressTypes().getAddressType().add("returns");
+
+						break;
+
+					case "main":
+						if (addressTypes.remove("claim"))
+							a.getAddressTypes().getAddressType().add("claim");
+
+						if (addressTypes.remove("order"))
+							a.getAddressTypes().getAddressType().add("order");
+
+						break;
+				}
+
+				if (x == (addressesList.size() - 1))
+					a.getAddressTypes().getAddressType().addAll(addressTypes);
+
+				Collections.sort(a.getAddressTypes().getAddressType());
+
+				if (addressType.equals(addressTypeMap.get(addressType)))
+					addresses.getAddress().add(a);
+			}
 		}
 
 		// set preferred
@@ -598,6 +669,8 @@ public class SyncProcessorImpl implements SyncProcessor
 					break;
 				}
 
+		// PhoneTypes: claimFax, orderFax, paymentFax, returnsFax,
+		// claimPhone, orderPhone, paymentPhone, returnsPhone
 		Phones phones = of.createPhones();
 		contactInfo.setPhones(phones);
 
@@ -607,10 +680,10 @@ public class SyncProcessorImpl implements SyncProcessor
 		if (e.getPhoneIll() != null && !"".equals(e.getPhoneIll()))
 		{
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
-			phoneTypes.getPhoneType().add("order_phone");
-			phoneTypes.getPhoneType().add("claim_phone");
-			phoneTypes.getPhoneType().add("payment_phone");
-			phoneTypes.getPhoneType().add("returns_phone");
+			phoneTypes.getPhoneType().add("orderPhone");
+			phoneTypes.getPhoneType().add("claimPhone");
+			phoneTypes.getPhoneType().add("paymentPhone");
+			phoneTypes.getPhoneType().add("returnsPhone");
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
@@ -630,10 +703,10 @@ public class SyncProcessorImpl implements SyncProcessor
 		if (e.getPhoneFax() != null && !"".equals(e.getPhoneFax()))
 		{
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
-			phoneTypes.getPhoneType().add("order_fax");
-			phoneTypes.getPhoneType().add("claim_fax");
-			phoneTypes.getPhoneType().add("payment_fax");
-			phoneTypes.getPhoneType().add("returns_fax");
+			phoneTypes.getPhoneType().add("orderFax");
+			phoneTypes.getPhoneType().add("claimFax");
+			phoneTypes.getPhoneType().add("paymentFax");
+			phoneTypes.getPhoneType().add("returnsFax");
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
@@ -653,7 +726,10 @@ public class SyncProcessorImpl implements SyncProcessor
 		if (e.getPhoneMain() != null && !"".equals(e.getPhoneMain()))
 		{
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
-			phoneTypes.getPhoneType().add("ALL");
+			phoneTypes.getPhoneType().add("orderPhone");
+			phoneTypes.getPhoneType().add("claimPhone");
+			phoneTypes.getPhoneType().add("paymentPhone");
+			phoneTypes.getPhoneType().add("returnsPhone");
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
@@ -670,6 +746,7 @@ public class SyncProcessorImpl implements SyncProcessor
 			phones.getPhone().add(phone);
 		}
 
+		// EmailType: claimMail, orderMail, paymentMail, queries, returnsMail
 		Emails emails = of.createEmails();
 		contactInfo.setEmails(emails);
 
@@ -679,7 +756,11 @@ public class SyncProcessorImpl implements SyncProcessor
 		if (e.getEmailIll() != null && !"".equals(e.getEmailIll()))
 		{
 			EmailTypes emailTypes = of.createEmailEmailTypes();
-			emailTypes.getEmailType().add("ill");
+			emailTypes.getEmailType().add("claimMail");
+			emailTypes.getEmailType().add("orderMail");
+			emailTypes.getEmailType().add("paymentMail");
+			emailTypes.getEmailType().add("queriesMail");
+			emailTypes.getEmailType().add("returnsMail");
 
 			Email email = of.createEmail();
 			email.setEmailTypes(emailTypes);
@@ -699,7 +780,11 @@ public class SyncProcessorImpl implements SyncProcessor
 		if (e.getEmailMain() != null && !"".equals(e.getEmailMain()))
 		{
 			EmailTypes emailTypes = of.createEmailEmailTypes();
-			emailTypes.getEmailType().add("main");
+			emailTypes.getEmailType().add("claimMail");
+			emailTypes.getEmailType().add("orderMail");
+			emailTypes.getEmailType().add("paymentMail");
+			emailTypes.getEmailType().add("queriesMail");
+			emailTypes.getEmailType().add("returnsMail");
 
 			Email email = of.createEmail();
 			email.setEmailTypes(emailTypes);
@@ -720,21 +805,48 @@ public class SyncProcessorImpl implements SyncProcessor
 		return p;
 	}
 
+	private Optional<String> addressSameAs(Address a)
+	{
+		if (a.getLine1() != null && a.getLine1().toLowerCase().startsWith("same as"))
+		{
+			Matcher m = patternSameAs.matcher(a.getLine1());
+			if (m.find())
+				return Optional.of(m.group(1).toLowerCase());
+		}
+		else if (a.getLine2() != null && a.getLine2().toLowerCase().startsWith("same as"))
+		{
+			Matcher m = patternSameAs.matcher(a.getLine2());
+			if (m.find())
+				return Optional.of(m.group(1).toLowerCase());
+		}
+		else if (a.getLine3() != null && a.getLine3().toLowerCase().startsWith("same as"))
+		{
+			Matcher m = patternSameAs.matcher(a.getLine3());
+			if (m.find())
+				return Optional.of(m.group(1).toLowerCase());
+		}
+
+		return Optional.empty();
+	}
+
+	private Address resolveAddress(Map<String, String> addressTypeMap, Map<String, Address> addresses,
+	                               String addressType)
+	{
+		String a = addressTypeMap.get(addressType);
+		while (a != addressTypeMap.get(a))
+			a = addressTypeMap.get(a);
+
+		return addresses.get(a);
+	}
+
 	private boolean isValidAddress(Address a)
 	{
 		if (a.getLine1() == null)
 			return false;
 
-		if (a.getCity() == null)
-			return false;
-
-		if (a.getLine1() != null && "same as".startsWith(a.getLine1().toLowerCase()))
-			return false;
-
-		if (a.getLine2() != null && "same as".startsWith(a.getLine2().toLowerCase()))
-			return false;
-
-		if (a.getLine3() != null && "same as".startsWith(a.getLine3().toLowerCase()))
+		if (a.getCity() == null && !((a.getLine1() != null && a.getLine1().toLowerCase().startsWith("same as")) ||
+		                             (a.getLine2() != null && a.getLine2().toLowerCase().startsWith("same as")) ||
+		                             (a.getLine3() != null && a.getLine3().toLowerCase().startsWith("same as"))))
 			return false;
 
 		return true;
