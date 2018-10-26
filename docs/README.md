@@ -55,7 +55,7 @@ We require the synchronisation of data for resource partners into Alma. There ar
 
 1. _Australia_
    - Address and contact information:
-     Web application: http://www.nla.gov.au/app/ilrs
+     Web application: http://www.nla.gov.au/apps/ilrs
    - Suspension status:
      Website: https://www.nla.gov.au/librariesaustralia/connect/find-library/ladd-members-and-suspensions
 2. _New Zealand_
