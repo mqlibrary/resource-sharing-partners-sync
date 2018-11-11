@@ -191,7 +191,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 				<inherited>true</inherited>
 				<configuration>
 					<source>1.8</source>
@@ -240,7 +240,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.13.2</version>
+				<version>0.14.0</version>
 				<executions>
 					<execution>
 						<id>generate-entity</id>
@@ -274,7 +274,7 @@
 								<plugin>
 									<groupId>org.jvnet.jaxb2_commons</groupId>
 									<artifactId>jaxb2-basics</artifactId>
-									<version>0.11.1</version>
+									<version>1.11.1</version>
 								</plugin>
 								<plugin>
 									<groupId>be.redlab.jaxb</groupId>
