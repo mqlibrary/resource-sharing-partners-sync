@@ -26,6 +26,7 @@ import org.nishen.resourcepartners.model.Email;
 import org.nishen.resourcepartners.model.Email.EmailTypes;
 import org.nishen.resourcepartners.model.Emails;
 import org.nishen.resourcepartners.model.IsoDetails;
+import org.nishen.resourcepartners.model.Note;
 import org.nishen.resourcepartners.model.ObjectFactory;
 import org.nishen.resourcepartners.model.Partner;
 import org.nishen.resourcepartners.model.PartnerDetails;
@@ -117,6 +118,16 @@ public class SyncProcessorImpl implements SyncProcessor
 			Partner b = almaPartners.get(s);
 			if (b != null)
 			{
+				// Check for NOSYNC in notes
+				boolean nosync = false;
+				for (Note note : b.getNotes().getNote())
+					if (note != null && "NOSYNC".equalsIgnoreCase(note.getContent()))
+						nosync = true;
+
+				// skip record if we have a NOSYNC flag.
+				if (nosync)
+					continue;
+
 				// we keep notes from Alma - source of truth for notes.
 				a.setNotes(b.getNotes());
 				log.debug("almaPartner[{}]: {}", s, JaxbUtilModel.formatPretty(b));
