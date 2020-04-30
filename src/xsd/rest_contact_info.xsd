@@ -1,0 +1,306 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:annotation>
+		<xs:documentation>Information about a Contact in Alma.</xs:documentation>
+	</xs:annotation>
+	
+	<xs:element name="contact_info" type="contact_info" />	
+	
+	<xs:complexType name="contact_info">
+		<xs:annotation>
+			<xs:documentation>List of the contact information. In the PUT action, this list will replace the existing contacts.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="addresses" type="addresses" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>List of contact's addresses.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="phones" type="phones" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>List of contact's phone numbers.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="emails" type="emails" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>List of contact's email addresses.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
+	
+	<xs:complexType name="addresses">
+		<xs:annotation>
+			<xs:documentation>List of contact's addresses. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="address" type="address" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A contact's specific address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="phones">
+		<xs:annotation>
+			<xs:documentation>List of contact's phone numbers. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="phone" type="phone" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A contact's specific phone number.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="emails">
+		<xs:annotation>
+			<xs:documentation>List of contact's email addresses. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="email" type="email" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A contact's specific email address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="address">
+		<xs:annotation>
+			<xs:documentation>A contact's specific address.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="line1" type="xs:string" minOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Line 1 of the address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line2" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Line 2 of the address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line3" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Line 3 of the address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line4" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Line 4 of the address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line5" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Line 5 of the address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="city" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The address' relevant city.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="state_province" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The address' relevant state.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="postal_code" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The address' relevant postal code.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="country" minOccurs="0">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:codeTable>CountryCodes</xs:codeTable>
+						<xs:example>VUT</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The address' relevant country. Possible codes are listed in 'Country Codes' code table.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="address_note" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The address' related note.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="start_date" type="xs:date" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The date from which the address is deemed to be active.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="end_date" type="xs:date" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The date after which the address is no longer active.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="address_types" minOccurs="0">
+				<xs:complexType>
+					<xs:annotation>
+						<xs:documentation>Address types.</xs:documentation>
+					</xs:annotation>
+					<xs:choice maxOccurs="unbounded">
+						<xs:element name="address_type">
+							<xs:annotation>
+								<xs:documentation>Address type.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:documentation>Possible values for partners: order, claim, payment, returns,
+									billing, shipping, ALL. Use ALL as default. Possible values for integration-profile:
+									office. </xs:documentation>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="order" />
+									<xs:enumeration value="claim" />
+									<xs:enumeration value="payment" />
+									<xs:enumeration value="returns" />
+									<xs:enumeration value="billing" />
+									<xs:enumeration value="shipping" />
+									<xs:enumeration value="office" />
+									<xs:enumeration value="ALL" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+		<xs:attribute name="preferred" type="xs:boolean" default="false">
+			<xs:annotation>
+				<xs:documentation>Indication whether the address is the preferred one.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="phone">
+		<xs:annotation>
+			<xs:documentation>A contact's specific phone number.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="phone_number" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The phone number.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="phone_types">
+				<xs:annotation>
+					<xs:documentation>Phone types.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:annotation>
+						<xs:documentation>Phone types.</xs:documentation>
+					</xs:annotation>
+					<xs:choice maxOccurs="unbounded">
+						<xs:element name="phone_type">
+							<xs:annotation>
+								<xs:documentation>Possible values for partners: order_phone, claim_phone,
+								payment_phone, returns_phone, order_fax, claim_fax, payment_fax,
+								returns_fax, ALL. Use ALL as default. Possible values for integration partners:
+								error_reporting, general.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="order_phone" />
+									<xs:enumeration value="claim_phone" />
+									<xs:enumeration value="payment_phone" />
+									<xs:enumeration value="returns_phone" />
+									<xs:enumeration value="order_fax" />
+									<xs:enumeration value="claim_fax" />
+									<xs:enumeration value="payment_fax" />
+									<xs:enumeration value="returns_fax" />
+									<xs:enumeration value="error_reporting" />
+									<xs:enumeration value="general" />
+									<xs:enumeration value="ALL" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+		<xs:attribute name="preferred" type="xs:boolean" default="false">
+			<xs:annotation>
+				<xs:documentation>Indication whether the address is the preferred one.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="preferredSMS" type="xs:boolean" default="false">
+			<xs:annotation>
+				<xs:documentation>Indication whether the phone number is the preferred one for SMS sending.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="email">
+		<xs:annotation>
+			<xs:documentation>A contact's specific email address.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="email_address" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The email address.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>The email address' related description.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="email_types">
+				<xs:annotation>
+					<xs:documentation>Email types.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:annotation>
+						<xs:documentation>Email type.</xs:documentation>
+					</xs:annotation>
+					<xs:choice maxOccurs="unbounded">
+						<xs:element name="email_type">
+							<xs:annotation>
+								<xs:documentation>Email type.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:documentation>Possible values for partners: order_mail, claim_mail,
+									payment_mail, returns_mail, personal, school, work, order, queries,
+									ALL. Use ALL as default. Possible values for integration profiles:
+									error_reporting, general. </xs:documentation>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="order_mail" />
+									<xs:enumeration value="claim_mail" />
+									<xs:enumeration value="payment_mail" />
+									<xs:enumeration value="returns_mail" />
+									<xs:enumeration value="personal" />
+									<xs:enumeration value="school" />
+									<xs:enumeration value="work" />
+									<xs:enumeration value="order" />
+									<xs:enumeration value="queries" />
+									<xs:enumeration value="error_reporting" />
+									<xs:enumeration value="general" />
+									<xs:enumeration value="ALL" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+		<xs:attribute name="preferred" type="xs:boolean" default="false">
+			<xs:annotation>
+				<xs:documentation>Indication whether the email address is the preferred one.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	
+</xs:schema>

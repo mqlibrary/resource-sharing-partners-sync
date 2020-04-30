@@ -25,6 +25,7 @@
  	<xs:all>
  		<xs:element minOccurs="1" name="errorCode" type="xs:string" />
 		<xs:element minOccurs="1" name="errorMessage" type="xs:string" />
+		<xs:element minOccurs="0" name="trackingId" type="xs:string" />
 	</xs:all>
   </xs:complexType>
 

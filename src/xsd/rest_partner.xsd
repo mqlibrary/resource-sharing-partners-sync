@@ -2,9 +2,10 @@
 
 	<xs:annotation>
 		<xs:documentation>Resource Sharing Partners represent the system(s) that Alma communicates in order to supply Resource Sharing services.
-		A partner can be defined as one of the supported communication profiles: NCIP, ART_EMAIL, ISO, BLDSS or EMAIL.</xs:documentation>
+		A partner can be defined as one of the supported communication profiles: NCIP, ART_EMAIL, ISO, BLDSS, FULFILLMENT_NETWORK or EMAIL.</xs:documentation>
 	</xs:annotation>
 
+<xs:include schemaLocation="rest_contact_info.xsd" />
 	<xs:include schemaLocation="rest_notes.xsd" />
 
 	<xs:element name="partner" type="partner" />
@@ -42,11 +43,17 @@
 		<xs:all>
 			<xs:element name="code" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>RELAIS_ILL</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The partner's code. Mandatory. Must be unique for each partner. The partner's code cannot be changed in the PUT action.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="name" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>Relais ILL</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The partner's name. Mandatory.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -57,6 +64,9 @@
 			</xs:element>
 			<xs:element name="status" type="status">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>ACTIVE</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The status of the partner. Mandatory. Possible values are:ACTIVE, INACTIVE.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -64,24 +74,37 @@
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:codeTable>PartnerSystemTypes</xs:codeTable>
+						<xs:example>RELAIS_ILL</xs:example>
 					</xs:appinfo>
 					<xs:documentation>The type of the partner's system. Mandatory. This field is used for information purposes only. Possible codes are listed in 'PartnerSystemTypes' code table.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Relais ILL</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="avg_supply_time" type="xs:int" default="0" minOccurs="0">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>0</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The average number of days that it takes the partner to supply the material. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="delivery_delay" type="xs:int" default="0" minOccurs="0">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>1</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The delivery delay number of days. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -92,21 +115,33 @@
 			</xs:element>
 			<xs:element name="borrowing_supported" type="xs:boolean">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Information whether the partner sends borrowing requests to Alma.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="borrowing_workflow" type="xs:string" default="DEFAULT_BOR_WF" minOccurs="0">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>Borrowing</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The partner's borrowing workflow. Relevant when borrowing_workflow is true.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="lending_supported" type="xs:boolean">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Information whether the partner receives lending requests from Alma.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="lending_workflow" type="xs:string" default="DEFAULT_LEND_WF" minOccurs="0">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>Lending</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The partner's lending workflow. Relevant when lending_workflow is true.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -129,6 +164,7 @@
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:tags>get post put</xs:tags>
+						<xs:example></xs:example>
 					</xs:appinfo>
 					<xs:documentation>The institution to be searched as part of locate. Relevant if locate_profile is not empty.
 					</xs:documentation>
@@ -138,6 +174,7 @@
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:tags>get post put</xs:tags>
+						<xs:example></xs:example>
 					</xs:appinfo>
 					<xs:documentation>The library or campus to be searched as part of locate. Relevant if locate_profile is not empty.
 					</xs:documentation>
@@ -154,8 +191,11 @@
 		<xs:all>
 			<xs:element name="profile_type" type="profile_type">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>NCIP</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The type of request/receive communication that takes place between Alma and a
-resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EMAIL,NCIP_P2P, SLNP, EXTERNAL_SYSTEM, BLDSS.</xs:documentation>
+resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO, ISO_18626, EMAIL, NCIP_P2P, SLNP, EXTERNAL_SYSTEM, BLDSS, FULFILLMENT_NETWORK.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="art_email_details" type="art_email_details" minOccurs="0">
@@ -173,6 +213,11 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 					<xs:documentation>ISO related details. Relevant and mandatory only if profile_type = ISO.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="iso_18626_details" type="iso_18626_details" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>ISO related details. Relevant and mandatory only if profile_type = ISO.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="email_details" type="email_details" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Email related details. Relevant and mandatory only if profile_type = Email.</xs:documentation>
@@ -186,6 +231,21 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 			<xs:element name="bldss_details" type="bldss_details" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>BLDSS related details. Relevant and mandatory only if profile_type = BLDSS.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fulfillment_network_details" type="fulfillment_network_details" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>fulfillment network related details. Relevant and mandatory only if profile_type = FULFILLMENT_NETWORK.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rapid_details" type="rapid_details" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>RapidILL related details. Relevant and mandatory only if profile_type = RapidILL.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="innreach_details" type="innreach_details" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>INN-Reach API related details. Relevant and mandatory only if profile_type = INNREACH.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:all>
@@ -239,6 +299,7 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:codeTable>ARTEmailServiceKeywords</xs:codeTable>
+						<xs:example>S</xs:example>
 					</xs:appinfo>
 					<xs:documentation>The British Library relevant service. Possible codes are listed in 'ARTEmailServiceKeywords' code table.</xs:documentation>
 				</xs:annotation>
@@ -261,6 +322,7 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:codeTable>ARTEmailDeliveryKeywords</xs:codeTable>
+						<xs:example>SED99*2*</xs:example>
 					</xs:appinfo>
 					<xs:documentation>The British Library relevant delivery format. Possible codes are listed in 'ARTEmailDeliveryKeywords' code table.</xs:documentation>
 				</xs:annotation>
@@ -283,6 +345,7 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:codeTable>ARTEmailQueriesKeywords</xs:codeTable>
+						<xs:example>COPYRT</xs:example>
 					</xs:appinfo>
 					<xs:documentation>The British Library relevant query code. Possible codes are listed in 'ARTEmailQueriesKeywords' code table.</xs:documentation>
 				</xs:annotation>
@@ -344,78 +407,133 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 			</xs:element>
 			<xs:element name="general_pushing_method" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>openURL</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The type of link that will be used to push the request into the resource sharing system. Mandatory. Possible values: openURL, Link.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="generalURL_template" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>https://h7.relais-host.com/nun/loginpRFT.jsp?LS=NUN</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The URL that is used to send patrons from Primo to the resource sharing library's Web site. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="general_broker_systemURL" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>https://requestb.in/1f8c5rc1</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The URL that is used to send request from Alma to NCIP broker. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="general_library_owner">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>RES_SHARE</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The resource sharing library code that is supported for all actions. Mandatory.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Resource Sharing Library</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="general_enable_service_without_login" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Indication whether service is enabled for guest user. Possible values: true, false.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="request_item_bib_type" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>OCLC</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The index that will be used to match the record that is described in the incoming RequestItem message. Optional indexes: OCLC, MMS_ID, LCCN, ISBN_ISSN, TAKEN_FROM_MESSAGE.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="request_item_support_borrowing" type="xs:boolean">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Indicates if patron support borrowing for Request Item.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="request_item_pickup_library">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>550.561.13641560000541</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Request Item pickup location library for borrowing request.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Main Library</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="request_item_location">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900870000541</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Request Item location for borrowing request.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Borrowing Resource Sharing Requests</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="check_out_location">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900850000541</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The temporary location at the resource sharing library that will be assigned to an item that is shipped to a resource sharing borrower. Mandatory.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Lending Resource Sharing Requests</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
@@ -424,60 +542,94 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 				<xs:annotation>
 					<xs:appinfo>
 						<xs:codeTable>ItemPolicy</xs:codeTable>
+						<xs:example>N</xs:example>
 					</xs:appinfo>
 					<xs:documentation>The policy that will be attached to an item that is shipped to a resource sharing borrower. Mandatory. Possible codes are listed in 'ItemPolicy' code table. Note that the policy should match the organization unit.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Normal</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="accept_item_location">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900870000541</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The temporary location at the resource sharing library that will be assigned to an item that is recieved for a borrowing request. Mandatory.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Borrowing Resource Sharing Requests</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="accept_item_pickup_library">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>550.561.13641560000541</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The default pickup location to which temporary items are transferred when an item arrives for a borrowing request.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Main Library</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="accept_item_automatic_receive" type="xs:boolean">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Indicates if automatic receive is supported or not.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="accept_item_receive_desk" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>RES_DESK</xs:example>
+					</xs:appinfo>
 					<xs:documentation>The desk from which the automatic receive will be done, if automatic receive is supported.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="look_up_user_authentication" type="xs:string">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>false</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Indication whether authentication should or should not be required for the resource sharing library's Web site. Possible values: true, false.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 
 			<xs:element name="export_to_third_party" type="xs:string">
 				<xs:annotation>
-					<xs:documentation>Indication whether ILLiad partner will be used in Rota. Possible values: true or false.</xs:documentation>
+					<xs:documentation>Indication whether ILLiad partner will be used in Rota. Possible values: NO, USING_EMAIL, USING_API.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 
@@ -486,9 +638,30 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 					<xs:documentation>ILLiad partner email address to send the request details.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			
+			<xs:element name="export_url" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>ILLiad partner API URL.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			
+			<xs:element name="export_api_key" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>ILLiad partner API key.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 
+			<xs:element name="export_request_id_name_tag" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>ILLiad partner request external ID name tag.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			
 			<xs:element name="close_request_on_export" type="xs:boolean">
 				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>false</xs:example>
+					</xs:appinfo>
 					<xs:documentation>Indication whether to mark resource sharing request as closed when send the request to ILLiad partner. Possible values: true or false.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -496,7 +669,199 @@ resource sharing system. Mandatory. Possible values are: NCIP, ART_EMAIL, ISO,EM
 		</xs:all>
 	</xs:complexType>
 
+	<xs:complexType name="innreach_details">
+		<xs:annotation>
+			<xs:documentation>INN-Reach related details. Relevant and mandatory only if profile_type = INNREACH.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="general_user_id_type" type="general_user_id_type" />
 
+			<xs:element name="general_loan_period" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The amount of time the user has before having to return the item to the resource sharing library(This may be seen by patrons in Primo). Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="general_pushing_method" type="xs:string">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>openURL</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The type of link that will be used to push the request into the resource sharing system. Mandatory. Possible values: openURL, Link.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="generalURL_template" type="xs:string">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>https://h7.relais-host.com/nun/loginpRFT.jsp?LS=NUN</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The URL that is used to send patrons from Primo to the resource sharing library's Web site. Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="general_library_owner">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>RES_SHARE</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The resource sharing library code that is supported for all actions. Mandatory.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Resource Sharing Library</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="general_enable_service_without_login" type="xs:string">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Indication whether service is enabled for guest user. Possible values: true, false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="request_item_support_borrowing" type="xs:boolean">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>true</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Indicates if patron support borrowing for Request Item. Always true for InnReach</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="request_item_pickup_library">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>550.561.13641560000541</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Request Item pickup location library for borrowing request.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Main Library</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="request_item_location">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900870000541</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Request Item location for borrowing request.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Borrowing Resource Sharing Requests</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="check_out_location">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900850000541</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The temporary location at the resource sharing library that will be assigned to an item that is shipped to a resource sharing borrower. Mandatory.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Lending Resource Sharing Requests</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="check_out_item_policy">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:codeTable>ItemPolicy</xs:codeTable>
+						<xs:example>N</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The policy that will be attached to an item that is shipped to a resource sharing borrower. Mandatory. Possible codes are listed in 'ItemPolicy' code table. Note that the policy should match the organization unit.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>Normal</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="look_up_user_authentication" type="xs:string">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>false</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Indication whether authentication should or should not be required for the resource sharing library's Web site. Possible values: true, false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			
+			<xs:element name="innreach_integration_profile">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>12900850000541</xs:example>
+					</xs:appinfo>
+					<xs:documentation>The INN-Reach integration profile Hibernate id</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="desc" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:appinfo>
+										<xs:example>INN-Reach Profile</xs:example>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="share_patron_information" type="xs:string">
+				<xs:annotation>
+					<xs:appinfo>
+						<xs:example>false</xs:example>
+					</xs:appinfo>
+					<xs:documentation>Indication whether the verify patron action should include patron information. Possible values: true, false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+		</xs:all>
+	</xs:complexType>
 
 	<xs:complexType name="email_details">
 		<xs:annotation>
@@ -561,6 +926,11 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>Indicates if local institution shares barcodes with the partner. Default is false.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="ignore_shipping_cost_override" type="xs:boolean" default="false" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indicates if local institution ignores the lender shipping cost. Default is false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="email_address" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>The email address to which the Overdue email will be sent - Relvants only for SLNP type.</xs:documentation>
@@ -574,6 +944,44 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 		</xs:all>
 	</xs:complexType>
 
+	<xs:complexType name="iso_18626_details">
+		<xs:annotation>
+			<xs:documentation>ISO 18626 related details. Relevant and mandatory only if profile_type = ISO_18626.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="alternative_document_delivery" type="xs:boolean" default="false" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indication whether to include the requester's email in the lending request, enabling the lending partner to send the shipped resource directly to the requester. Optional. Default value is false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ill_server" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The partner's server name (or IP address). Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="iso_symbol" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>the symbol by which the ILL partner is referred. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="send_requester_information" type="xs:boolean" default="false" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indicates if to send patron information on the borrowing request. Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="shared_barcodes" type="xs:boolean" default="false" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indicates if local institution shares barcodes with the partner. Default is false.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resending_overdue_message_interval" type="xs:int" default="0" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The Interval (In days) that the overdue message will be sent to partner. Must be a number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
+	
 	<xs:complexType name="ncip_p2p_details">
 		<xs:annotation>
 			<xs:documentation>NCIP_P2P related details. Relevant and mandatory only if profile_type = NCIP_P2P.</xs:documentation>
@@ -613,7 +1021,11 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>Indicates if to send patron information on the borrowing request. Optional.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-
+			<xs:element name="email_address" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The email address to which the Overdue email will be sent</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="resending_overdue_message_interval" type="xs:int" default="0" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>The Interval (In days) that the overdue message will be sent to partner. Must be a number</xs:documentation>
@@ -646,8 +1058,9 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
                <xs:annotation>
 	               <xs:appinfo>
 	               		<xs:codeTable>BLDSSDigitalFormats</xs:codeTable>
+						<xs:example>1</xs:example>
 	               </xs:appinfo>
-	               <xs:documentation> The BLDSS digital format. Possible codes are listed in the &#8216;BLDSSDigitalFormats&#8217; code table.</xs:documentation>
+	               <xs:documentation> The BLDSS digital format. Possible codes are listed in the ‘BLDSSDigitalFormats’ code table.</xs:documentation>
                </xs:annotation>
                <xs:complexType>
 	               <xs:simpleContent>
@@ -660,6 +1073,77 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 			<xs:element name="bldss_send_requester_info" type="xs:boolean" default="false">
 				<xs:annotation>
 					<xs:documentation>The BLDSS send requester Info.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="fulfillment_network_details">
+		<xs:annotation>
+			<xs:documentation>FULFILLMENT_NETWORK related details. Relevant and mandatory only if profile_type = FULFILLMENT_NETWORK.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="fulfillment_network_customer_code" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The FULFILLMENT_NETWORK customer code. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fulfillment_network_url" type="xs:string" >
+				<xs:annotation>
+					<xs:documentation>The FULFILLMENT_NETWORK URL.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="request_expiry_type" type="request_expiry_type" />
+			<xs:element name="expiry_time" type="xs:int" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>If EXPIRY_TIME was selected as the expiry_type, this field should hold the relevant number of days. Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
+	
+	<xs:complexType name="rapid_details">
+		<xs:annotation>
+			<xs:documentation>RapidILL related details. Relevant and mandatory only if profile_type = RapidILL.</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="rapid_url" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The RapidILL URL.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rapid_user_name" type="xs:string" >
+				<xs:annotation>
+					<xs:documentation>The RapidILL User Name. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rapid_password" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The RapidILL password. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requesting_rapid_code" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The RapidILL Requesting Rapid Code. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rapid_requesting_branch_name" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The RapidILL Requesting Branch Name. Mandatory.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="send_requester_info" type="xs:boolean" default="false">
+				<xs:annotation>
+					<xs:documentation>The RapidILL Send Requester Info.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="alternative_document_delivery" type="xs:boolean" default="false">
+				<xs:annotation>
+					<xs:documentation>The RapidILL Alternative Document Delivery.</xs:documentation>
+				</xs:annotation>
+			</xs:element><xs:element name="close_request_on_export" type="xs:boolean" default="true">
+				<xs:annotation>
+					<xs:documentation>The RapidILL Close request when exported.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:all>
@@ -697,6 +1181,11 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>Communication between Alma and another resource sharing (Alma or non-Alma) system.</xs:documentation>
 				</xs:annotation>
 			</xs:enumeration>
+			<xs:enumeration value="ISO_18626">
+				<xs:annotation>
+					<xs:documentation>Communication between Alma and another resource sharing (Alma or non-Alma) system according to ISO 18626.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
 			<xs:enumeration value="EMAIL">
 				<xs:annotation>
 					<xs:documentation>The sending of borrowing requests by the Alma borrowing partner via email.</xs:documentation>
@@ -722,294 +1211,30 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 					<xs:documentation>British Library Document Supply Service</xs:documentation>
 				</xs:annotation>
 			</xs:enumeration>
+			<xs:enumeration value="FULFILLMENT_NETWORK">
+				<xs:annotation>
+					<xs:documentation>Fulfillment Network partner type</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="RAPID">
+				<xs:annotation>
+					<xs:documentation>RapidILL Protocol</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="INNREACH">
+				<xs:annotation>
+					<xs:documentation>INN-Reach API Protocol</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
 		</xs:restriction>
 	</xs:simpleType>
 
-	<xs:complexType name="contact_info">
-		<xs:annotation>
-			<xs:documentation>List of the partner's contact information. In the PUT action, this list will replace the existing contacts.</xs:documentation>
-		</xs:annotation>
-		<xs:all>
-			<xs:element name="addresses" type="addresses" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>List of partner's addresses.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="phones" type="phones" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>List of partner's phone numbers.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="emails" type="emails" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>List of partner's email addresses.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-		</xs:all>
-	</xs:complexType>
-
-
-	<xs:complexType name="addresses">
-		<xs:annotation>
-			<xs:documentation>List of partner's addresses. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:element name="address" type="address" minOccurs="0" maxOccurs="unbounded">
-				<xs:annotation>
-					<xs:documentation>A partner's specific address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="phones">
-		<xs:annotation>
-			<xs:documentation>List of partner's phone numbers. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:element name="phone" type="phone" minOccurs="0" maxOccurs="unbounded">
-				<xs:annotation>
-					<xs:documentation>A partner's specific phone number.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="emails">
-		<xs:annotation>
-			<xs:documentation>List of partner's email addresses. In the PUT action the incoming list will replace the existing list. If the incoming list is empty, the existing list will be deleted.</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:element name="email" type="email" minOccurs="0" maxOccurs="unbounded">
-				<xs:annotation>
-					<xs:documentation>A partner's specific email address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="address">
-		<xs:annotation>
-			<xs:documentation>A partner's specific address.</xs:documentation>
-		</xs:annotation>
-		<xs:all>
-			<xs:element name="line1" type="xs:string" minOccurs="1">
-				<xs:annotation>
-					<xs:documentation>Line 1 of the address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="line2" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Line 2 of the address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="line3" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Line 3 of the address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="line4" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Line 4 of the address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="line5" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Line 5 of the address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="city" type="xs:string" minOccurs="1">
-				<xs:annotation>
-					<xs:documentation>The address' relevant city.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="state_province" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>The address' relevant state.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="postal_code" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>The address' relevant postal code.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="country" minOccurs="0">
-				<xs:annotation>
-					<xs:appinfo>
-						<xs:codeTable>CountryCodes</xs:codeTable>
-					</xs:appinfo>
-					<xs:documentation>The address' relevant country. Possible codes are listed in 'Country Codes' code table.</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:simpleContent>
-						<xs:extension base="xs:string">
-							<xs:attribute name="desc" type="xs:string" use="optional" />
-						</xs:extension>
-					</xs:simpleContent>
-				</xs:complexType>
-			</xs:element>
-			<xs:element name="address_note" type="xs:string" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>The address' related note.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="start_date" type="xs:date" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>The date from which the address is deemed to be active.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="end_date" type="xs:date" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>The date after which the address is no longer active.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="address_types" minOccurs="0">
-				<xs:complexType>
-					<xs:annotation>
-						<xs:documentation>Address types.</xs:documentation>
-					</xs:annotation>
-					<xs:choice maxOccurs="unbounded">
-						<xs:element name="address_type">
-							<xs:annotation>
-								<xs:documentation>Address type.</xs:documentation>
-							</xs:annotation>
-							<xs:simpleType>
-								<xs:annotation>
-									<xs:documentation>Possible values: order, claim, payment, returns, billing, shipping, ALL. Use ALL as default.</xs:documentation>
-								</xs:annotation>
-								<xs:restriction base="xs:string">
-									<xs:enumeration value="order" />
-									<xs:enumeration value="claim" />
-									<xs:enumeration value="payment" />
-									<xs:enumeration value="returns" />
-									<xs:enumeration value="billing" />
-									<xs:enumeration value="shipping" />
-									<xs:enumeration value="ALL" />
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-		</xs:all>
-		<xs:attribute name="preferred" type="xs:boolean" default="false">
-			<xs:annotation>
-				<xs:documentation>Indication whether the address is the preferred one.</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="phone">
-		<xs:annotation>
-			<xs:documentation>A partner's specific phone number.</xs:documentation>
-		</xs:annotation>
-		<xs:all>
-			<xs:element name="phone_number" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>The phone number.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="phone_types">
-				<xs:annotation>
-					<xs:documentation>Phone types.</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:annotation>
-						<xs:documentation>Phone types.</xs:documentation>
-					</xs:annotation>
-					<xs:choice maxOccurs="unbounded">
-						<xs:element name="phone_type">
-							<xs:annotation>
-								<xs:documentation>Pssobile values: order_phone, claim_phone, payment_phone, returns_phone, order_fax, claim_fax, payment_fax, returns_fax, ALL. Use ALL as default.</xs:documentation>
-							</xs:annotation>
-							<xs:simpleType>
-								<xs:restriction base="xs:string">
-									<xs:enumeration value="order_phone" />
-									<xs:enumeration value="claim_phone" />
-									<xs:enumeration value="payment_phone" />
-									<xs:enumeration value="returns_phone" />
-									<xs:enumeration value="order_fax" />
-									<xs:enumeration value="claim_fax" />
-									<xs:enumeration value="payment_fax" />
-									<xs:enumeration value="returns_fax" />
-									<xs:enumeration value="ALL" />
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-		</xs:all>
-
-		<xs:attribute name="preferred" type="xs:boolean" default="false">
-			<xs:annotation>
-				<xs:documentation>Indication whether the phone number is the preferred one.</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="preferredSMS" type="xs:boolean" default="false">
-			<xs:annotation>
-				<xs:documentation>Indication whether the phone number is the preferred one for SMS sending.</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="email">
-		<xs:annotation>
-			<xs:documentation>A partner's specific email address.</xs:documentation>
-		</xs:annotation>
-		<xs:all>
-			<xs:element name="email_address" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>The email address.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
-				<xs:annotation>
-					<xs:documentation>The email address' related description.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="email_types">
-				<xs:annotation>
-					<xs:documentation>Email types.</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:annotation>
-						<xs:documentation>Email type.</xs:documentation>
-					</xs:annotation>
-					<xs:choice maxOccurs="unbounded">
-						<xs:element name="email_type">
-							<xs:annotation>
-								<xs:documentation>Email type.</xs:documentation>
-							</xs:annotation>
-							<xs:simpleType>
-								<xs:annotation>
-									<xs:documentation>Possible values: order_mail, claim_mail, payment_mail, returns_mail, queries, ALL. Use ALL as default</xs:documentation>
-								</xs:annotation>
-								<xs:restriction base="xs:string">
-									<xs:enumeration value="order_mail" />
-									<xs:enumeration value="claim_mail" />
-									<xs:enumeration value="payment_mail" />
-									<xs:enumeration value="returns_mail" />
-									<xs:enumeration value="queries" />
-									<xs:enumeration value="ALL" />
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-		</xs:all>
-		<xs:attribute name="preferred" type="xs:boolean" default="false">
-			<xs:annotation>
-				<xs:documentation>Indication whether the email address is the preferred one.</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-	</xs:complexType>
 
 	<xs:complexType name="general_user_id_type">
 		<xs:annotation>
 			<xs:appinfo>
 				<xs:codeTable>UserIdentifierTypes</xs:codeTable>
+				<xs:example>userName</xs:example>
 			</xs:appinfo>
 			<xs:documentation>The identification type that will be used to match users when a message contains a user ID. Mandatory. Possible codes are listed in 'UserIdentifierTypes' code table. In addition, the user_name can be used in order to match based on the primary identifier.</xs:documentation>
 		</xs:annotation>
@@ -1023,6 +1248,7 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 		<xs:annotation>
 			<xs:appinfo>
 				<xs:codeTable>ExpiryType</xs:codeTable>
+				<xs:example>EXPIRY_TIME</xs:example>
 			</xs:appinfo>
 			<xs:documentation>The expiry option of the request: NO_EXPIRY, INTEREST_DATE or EXPIRY_TIME. Optional. Default: NO_EXPIRY Possible codes are listed in ExpiryType code table.</xs:documentation>
 		</xs:annotation>
@@ -1034,3 +1260,4 @@ Configuration - Configuration menu - External Systems - Allowed Emails). Mandato
 	</xs:complexType>
 
 </xs:schema>
+
