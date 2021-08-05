@@ -76,7 +76,7 @@ public class ElasticSearchPartner implements ElasticSearchEntity, Serializable
 	@Override
 	public String getElasticSearchType()
 	{
-		return "partner-record";
+		return "_doc";
 	}
 
 	@Override
