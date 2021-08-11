@@ -6,14 +6,14 @@
 	<groupId>org.nishen</groupId>
 	<artifactId>resource-sharing-partners-sync</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.0</version>
+	<version>0.2.2</version>
 
 	<name>resource-sharing-partners-sync</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<docker.registry>ghcr.io/mqlibrary</docker.registry>
-		<jersey.version>2.27</jersey.version>
+		<jersey.version>2.34</jersey.version>
 		<log.base>/Data/resource-partners/logs</log.base>
 		<log.level>DEBUG</log.level>
 	</properties>
@@ -44,32 +44,27 @@
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
-			<version>4.2.2</version>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-persist</artifactId>
-			<version>4.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.inject.extensions</groupId>
-			<artifactId>guice-multibindings</artifactId>
-			<version>4.2.2</version>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-assistedinject</artifactId>
-			<version>4.2.2</version>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-servlet</artifactId>
-			<version>4.2.2</version>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.hk2</groupId>
 			<artifactId>guice-bridge</artifactId>
-			<version>2.5.0-b62</version>
+			<version>2.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jvnet.jaxb2_commons</groupId>
