@@ -392,7 +392,7 @@ __DATASTORE RECORD:__
       "iso_details": {
         "alternative_document_delivery": false,
         "ill_server": "nla.vdxhost.com",
-        "ill_port": 1612,
+        "ill_port": 1611,
         "iso_symbol": "NLA:NCN",
         "request_expiry_type": {
           "value": "INTEREST_DATE",
