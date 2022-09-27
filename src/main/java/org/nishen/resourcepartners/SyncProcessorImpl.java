@@ -744,7 +744,7 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		if (e.getPhoneMain() != null && !"".equals(e.getPhoneMain()))
 		{
-			String phoneTmp = e.getPhoneFax();
+			String phoneTmp = e.getPhoneMain();
 			if (phoneTmp.length() > 40)
 				phoneTmp = phoneTmp.substring(0, 40);
 
