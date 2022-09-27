@@ -690,6 +690,10 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		if (e.getPhoneIll() != null && !"".equals(e.getPhoneIll()))
 		{
+			String phoneTmp = e.getPhoneIll();
+			if (phoneTmp.length() > 40)
+				phoneTmp = phoneTmp.substring(0, 40);
+
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
 			phoneTypes.getPhoneType().add("orderPhone");
 			phoneTypes.getPhoneType().add("claimPhone");
@@ -698,7 +702,7 @@ public class SyncProcessorImpl implements SyncProcessor
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
-			phone.setPhoneNumber(e.getPhoneIll());
+			phone.setPhoneNumber(phoneTmp);
 			phone.setPreferred(false);
 			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
 			{
@@ -713,6 +717,10 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		if (e.getPhoneFax() != null && !"".equals(e.getPhoneFax()))
 		{
+			String phoneTmp = e.getPhoneFax();
+			if (phoneTmp.length() > 40)
+				phoneTmp = phoneTmp.substring(0, 40);
+
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
 			phoneTypes.getPhoneType().add("orderFax");
 			phoneTypes.getPhoneType().add("claimFax");
@@ -721,7 +729,7 @@ public class SyncProcessorImpl implements SyncProcessor
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
-			phone.setPhoneNumber(e.getPhoneFax());
+			phone.setPhoneNumber(phoneTmp);
 			phone.setPreferred(false);
 			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
 			{
@@ -736,6 +744,10 @@ public class SyncProcessorImpl implements SyncProcessor
 
 		if (e.getPhoneMain() != null && !"".equals(e.getPhoneMain()))
 		{
+			String phoneTmp = e.getPhoneFax();
+			if (phoneTmp.length() > 40)
+				phoneTmp = phoneTmp.substring(0, 40);
+
 			PhoneTypes phoneTypes = of.createPhonePhoneTypes();
 			phoneTypes.getPhoneType().add("orderPhone");
 			phoneTypes.getPhoneType().add("claimPhone");
@@ -744,7 +756,7 @@ public class SyncProcessorImpl implements SyncProcessor
 
 			Phone phone = of.createPhone();
 			phone.setPhoneTypes(phoneTypes);
-			phone.setPhoneNumber(e.getPhoneMain());
+			phone.setPhoneNumber(phoneTmp);
 			phone.setPreferred(false);
 			if (!preferredPhoneTypeSet && phoneTypes.getPhoneType().contains(preferredPhoneType))
 			{
