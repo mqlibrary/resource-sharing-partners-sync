@@ -114,7 +114,7 @@ public class ConfigImpl implements Config
 		ObjectMapper mapper = new ObjectMapper();
 		String esConfig = mapper.writeValueAsString(config);
 
-		WebTarget t = elasticTarget.path(Config.ES_INDEX).path(Config.ES_TYPE).path(configId);
+		WebTarget t = elasticTarget.path(Config.ES_INDEX).path("_doc").path(configId);
 		Builder req = t.request(MediaType.APPLICATION_JSON);
 		String result = req.put(Entity.entity(esConfig, MediaType.APPLICATION_JSON), String.class);
 
@@ -126,7 +126,7 @@ public class ConfigImpl implements Config
 		Map<String, String> config = null;
 		try
 		{
-			WebTarget t = elasticTarget.path(Config.ES_INDEX).path(Config.ES_TYPE).path(configId).path("_source");
+			WebTarget t = elasticTarget.path(Config.ES_INDEX).path("_source").path(configId);
 			String esConfig = t.request().accept(MediaType.APPLICATION_JSON).get(String.class);
 
 			TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};

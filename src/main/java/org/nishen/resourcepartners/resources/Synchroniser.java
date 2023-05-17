@@ -28,13 +28,8 @@ import org.nishen.resourcepartners.model.Partners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Path("{nuc}")
 @Produces(MediaType.APPLICATION_JSON)
-@Api
 public class Synchroniser
 {
 	private static final Logger log = LoggerFactory.getLogger(Synchroniser.class);
@@ -56,28 +51,18 @@ public class Synchroniser
 
 	@GET
 	@Path("test")
-	@ApiOperation(value = "test service", notes = "make a test call to ensure service is functioning")
-	public Response
-	       test(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                      required = true) @PathParam("nuc") String nuc,
-	            @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                      required = true) @HeaderParam("Authorization") String authorization)
+	public Response test(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[test] nuc: {}, authorization: {}", nuc, authorization);
 
-		return Response.ok().entity(String.format("{ \"Authorization\" : \"%s...\"}", authorization.substring(0, 10)))
+		return Response.ok()
+		               .entity(String.format("{ \"Authorization\" : \"%s...\"}", authorization.substring(0, 10)))
 		               .build();
 	}
 
 	@GET
 	@Path("sync")
-	@ApiOperation(value = "synchronise Alma institution resource sharing partners with datasource",
-	              response = Partners.class)
-	public Response
-	       sync(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                      required = true) @PathParam("nuc") String nuc,
-	            @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                      required = true) @HeaderParam("Authorization") String authorization)
+	public Response sync(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[sync] nuc: {}, key: {}", nuc, authorization);
 
@@ -97,7 +82,8 @@ public class Synchroniser
 		{
 			log.warn("{}", se.getMessage(), se);
 			return Response.status(Status.NOT_FOUND)
-			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}").build();
+			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}")
+			               .build();
 		}
 		catch (Exception e)
 		{
@@ -110,13 +96,7 @@ public class Synchroniser
 
 	@GET
 	@Path("preview")
-	@ApiOperation(value = "preview of records that will be changed when sync is called. Does not change any data",
-	              response = Partners.class)
-	public Response
-	       preview(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                         required = true) @PathParam("nuc") String nuc,
-	               @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                         required = true) @HeaderParam("Authorization") String authorization)
+	public Response preview(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[preview] nuc: {}, key: {}", nuc, authorization);
 
@@ -136,7 +116,8 @@ public class Synchroniser
 		{
 			log.warn("{}", se.getMessage(), se);
 			return Response.status(Status.NOT_FOUND)
-			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}").build();
+			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}")
+			               .build();
 		}
 		catch (Exception e)
 		{
@@ -149,13 +130,7 @@ public class Synchroniser
 
 	@GET
 	@Path("changes")
-	@ApiOperation(value = "view all fields that will be changed on sync", response = ElasticSearchChangeRecord.class,
-	              responseContainer = "List")
-	public Response
-	       changes(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                         required = true) @PathParam("nuc") String nuc,
-	               @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                         required = true) @HeaderParam("Authorization") String authorization)
+	public Response changes(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[changes] nuc: {}, key: {}", nuc, authorization);
 
@@ -180,7 +155,8 @@ public class Synchroniser
 		{
 			log.warn("{}", se.getMessage(), se);
 			return Response.status(Status.NOT_FOUND)
-			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}").build();
+			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}")
+			               .build();
 		}
 		catch (Exception e)
 		{
@@ -191,12 +167,7 @@ public class Synchroniser
 
 	@GET
 	@Path("orphaned")
-	@ApiOperation(value = "view records in Alma with no equivalent in the datasource", response = Partners.class)
-	public Response
-	       orphaned(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                          required = true) @PathParam("nuc") String nuc,
-	                @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                          required = true) @HeaderParam("Authorization") String authorization)
+	public Response orphaned(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[orphaned] nuc: {}, key: {}", nuc, authorization);
 
@@ -216,7 +187,8 @@ public class Synchroniser
 		{
 			log.warn("{}", se.getMessage(), se);
 			return Response.status(Status.NOT_FOUND)
-			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}").build();
+			               .entity("{\"error\": \"configuration for organisation not found: " + nuc + "\"}")
+			               .build();
 		}
 		catch (Exception e)
 		{
@@ -229,12 +201,7 @@ public class Synchroniser
 
 	@GET
 	@Path("expirecache")
-	@ApiOperation(value = "clear the cache")
-	public Response
-	       expireCache(@ApiParam(value = "Organisations NUC (National Union Code) symbol",
-	                             required = true) @PathParam("nuc") String nuc,
-	                   @ApiParam(value = "ExLibiris API key, e.g. 'apikey 17xxxxxxx...'",
-	                             required = true) @HeaderParam("Authorization") String authorization)
+	public Response expireCache(@PathParam("nuc") String nuc, @HeaderParam("Authorization") String authorization)
 	{
 		log.debug("[expireCache] nuc: {}, key: {}", nuc, authorization);
 
