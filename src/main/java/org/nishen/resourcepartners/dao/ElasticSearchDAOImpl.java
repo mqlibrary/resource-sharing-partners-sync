@@ -75,9 +75,8 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 		ElasticSearchPartner configInfo = new ElasticSearchPartner();
 
 		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex())
-		                           .path(configInfo.getElasticSearchType())
-		                           .path(id)
-		                           .path("_source");
+		                           .path("_source")
+		                           .path(id);
 
 		ElasticSearchPartner partner = null;
 		try
@@ -105,7 +104,7 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 
 		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex())
 		                           .path("_search")
-		                           .queryParam("sort", "nuc")
+		                           .queryParam("sort", "nuc.keyword")
 		                           .queryParam("size", SEARCH_SIZE);
 
 		String result = t.request().accept(MediaType.APPLICATION_JSON).get(String.class);
@@ -198,7 +197,7 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	public void delEntity(ElasticSearchEntity esEntity)
 	{
 		WebTarget t = elasticTarget.path(esEntity.getElasticSearchIndex())
-		                           .path(esEntity.getElasticSearchType())
+		                           .path("_doc")
 		                           .path(esEntity.getElasticSearchId());
 
 		try

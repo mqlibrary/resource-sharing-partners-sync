@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -6,7 +7,7 @@
 	<groupId>org.nishen</groupId>
 	<artifactId>resource-sharing-partners-sync</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.4</version>
+	<version>0.2.5</version>
 
 	<name>resource-sharing-partners-sync</name>
 
@@ -240,7 +241,8 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>org.nishen.resourcepartners.SyncLauncher</mainClass>
+									<mainClass>
+										org.nishen.resourcepartners.SyncLauncher</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
@@ -253,7 +255,8 @@
 						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>src/assembly/resource-sharing-partners-sync.xml</descriptor>
+								<descriptor>
+									src/assembly/resource-sharing-partners-sync.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>
@@ -263,6 +266,18 @@
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<version>0.14.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+						<version>1.2.3</version>
+					</dependency>
+					<dependency>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-runtime</artifactId>
+						<version>2.3.5</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<id>generate-entity</id>
@@ -274,7 +289,8 @@
 							<extension>true</extension>
 							<episode>false</episode>
 							<generatePackage>org.nishen.resourcepartners.model</generatePackage>
-							<generateDirectory>${project.build.directory}/generated-sources/xjc1</generateDirectory>
+							<generateDirectory>
+								${project.build.directory}/generated-sources/xjc1</generateDirectory>
 							<args>
 								<arg>-XtoString</arg>
 								<arg>-Xequals</arg>
@@ -301,7 +317,7 @@
 								<plugin>
 									<groupId>be.redlab.jaxb</groupId>
 									<artifactId>swagger-jaxb</artifactId>
-									<version>1.5</version>
+									<version>1.7</version>
 								</plugin>
 							</plugins>
 						</configuration>
@@ -330,7 +346,8 @@
 				<configuration>
 					<images>
 						<image>
-							<name>${docker.registry}/${project.artifactId}:${project.version}</name>
+							<name>
+								${docker.registry}/${project.artifactId}:${project.version}</name>
 							<alias>${project.artifactId}</alias>
 							<build>
 								<dockerFileDir>${project.basedir}</dockerFileDir>
