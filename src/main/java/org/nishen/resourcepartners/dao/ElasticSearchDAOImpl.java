@@ -74,9 +74,7 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	{
 		ElasticSearchPartner configInfo = new ElasticSearchPartner();
 
-		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex())
-		                           .path("_source")
-		                           .path(id);
+		WebTarget t = elasticTarget.path(configInfo.getElasticSearchIndex()).path("_source").path(id);
 
 		ElasticSearchPartner partner = null;
 		try
@@ -174,7 +172,7 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 			String pattern = "{\"update\": { \"_index\": \"%s\", \"_type\": \"%s\", \"_id\": \"%s\"}}\n";
 			Object[] args = new String[3];
 			args[0] = e.getElasticSearchIndex();
-			args[1] = e.getElasticSearchType();
+			args[1] = "_doc";
 			args[2] = e.getElasticSearchId();
 
 			out.append(String.format(pattern, args));
@@ -196,9 +194,8 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 	@Override
 	public void delEntity(ElasticSearchEntity esEntity)
 	{
-		WebTarget t = elasticTarget.path(esEntity.getElasticSearchIndex())
-		                           .path("_doc")
-		                           .path(esEntity.getElasticSearchId());
+		WebTarget t =
+		        elasticTarget.path(esEntity.getElasticSearchIndex()).path("_doc").path(esEntity.getElasticSearchId());
 
 		try
 		{
