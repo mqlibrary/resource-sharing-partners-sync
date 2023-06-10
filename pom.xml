@@ -323,7 +323,7 @@
 				<version>3.3.2</version>
 				<configuration>
 					<from>
-						<image>eclipse-temurin:11</image>
+						<image>eclipse-temurin:11-alpine</image>
 					</from>
 					<to>
 						<image>ghcr.io/mqlibrary/${project.artifactId}:${project.version}</image>
@@ -332,13 +332,11 @@
 						<executable>/usr/bin/podman</executable>
 					</dockerClient>
 					<container>
-						<jvmFlags>
-							<jvmFlag>-Xms256m</jvmFlag>
-							<jvmFlag>-Xmx256m</jvmFlag>
-							<jvmFlag>$JAVA_OPTS</jvmFlag>
-						</jvmFlags>
-						<entrypoint>java,-cp,@/app/jib-classpath-file,@/app/jib-main-class-file</entrypoint>
-						<!-- <entrypoint>java,-jar,/app/${project.artifactId}-${project.version}.jar</entrypoint> -->
+						<entrypoint>
+							<arg>/bin/sh</arg>
+							<arg>-c</arg>
+							<arg>exec java $JAVA_OPTS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )</arg>
+						</entrypoint>
 					</container>
 				</configuration>
 			</plugin>
