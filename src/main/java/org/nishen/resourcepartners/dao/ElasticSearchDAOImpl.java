@@ -169,11 +169,10 @@ public class ElasticSearchDAOImpl implements ElasticSearchDAO
 				}
 			}
 
-			String pattern = "{\"update\": { \"_index\": \"%s\", \"_type\": \"%s\", \"_id\": \"%s\"}}\n";
+			String pattern = "{\"update\": { \"_index\": \"%s\", \"_id\": \"%s\"}}\n";
 			Object[] args = new String[3];
 			args[0] = e.getElasticSearchIndex();
-			args[1] = "_doc";
-			args[2] = e.getElasticSearchId();
+			args[1] = e.getElasticSearchId();
 
 			out.append(String.format(pattern, args));
 			out.append("{ \"doc\": ");
