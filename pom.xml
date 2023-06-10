@@ -322,15 +322,26 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>3.3.2</version>
 				<configuration>
+					<from>
+						<image>eclipse-temurin:11</image>
+					</from>
 					<to>
 						<image>ghcr.io/mqlibrary/${project.artifactId}:${project.version}</image>
 					</to>
 					<dockerClient>
-						<executable>podman</executable>
+						<executable>/usr/bin/podman</executable>
 					</dockerClient>
+					<container>
+						<jvmFlags>
+							<jvmFlag>-Xms256m</jvmFlag>
+							<jvmFlag>-Xmx256m</jvmFlag>
+							<jvmFlag>$JAVA_OPTS</jvmFlag>
+						</jvmFlags>
+						<entrypoint>java,-cp,@/app/jib-classpath-file,@/app/jib-main-class-file</entrypoint>
+						<!-- <entrypoint>java,-jar,/app/${project.artifactId}-${project.version}.jar</entrypoint> -->
+					</container>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
